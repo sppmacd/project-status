@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 import os
 
-def print_depth(depth):
-    return "  "*depth;
+import util
 
 class File:
     def __init__(self, path):
         self.path = path
-        print(path)
         
     def __str__(self, depth=0):
-        return print_depth(depth) + self.path + "\n"
+        return util.depth_indent(depth) + self.path + "\n"
 
 class Directory(File):
     def __init__(self, path):
