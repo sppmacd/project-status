@@ -1,4 +1,5 @@
 import os
+import re
 import stat
 import sys
 
@@ -52,29 +53,45 @@ class FileType:
 class filetypes:
     
     # MIME types
+    mime_cpp = FileType(FileType.Class.MimeType, "text/x-c")
     mime_directory = FileType(FileType.Class.MimeType, "inode/directory")
     mime_gitignore = FileType(FileType.Class.MimeType, "custom$git/ignore")
     mime_gitattributes = FileType(FileType.Class.MimeType, "custom$git/attributes")
+    mime_java = FileType(FileType.Class.MimeType, "custom$/java")
+    mime_js = FileType(FileType.Class.MimeType, "application/js")
     mime_python = FileType(FileType.Class.MimeType, "application/x-python")
     mime_symlink = FileType(FileType.Class.MimeType, "inode/symlink")
-    mime_text_plain = FileType(FileType.Class.MimeType, "text/plain")
+    mime_text_plain = FileType(FileType.Class.MimeType, "text/x-java-source")
     
     # Version controls
     version_git = FileType(FileType.Class.VersionControl, "git")
                   
     # Build systems
+    build_cmake =  FileType(FileType.Class.BuildSystem, "cmake")
+    build_gnu_make = FileType(FileType.Class.BuildSystem, "gnu_make")
+    build_gradle = FileType(FileType.Class.BuildSystem, "gradle")
+    build_gulp = FileType(FileType.Class.BuildSystem, "gulp")
+    build_node_js = FileType(FileType.Class.BuildSystem, "node_js")
     build_python =  FileType(FileType.Class.BuildSystem, "python")
 
 class Guesser:
     def guess(self, file):
         return []
 
-class Guesser_Inode(Guesser):
+class Guesser_Cpp(Guesser):
     def guess(self, file):
-        if file.is_directory():
-            return [FileGuess(filetypes.mime_directory)]
-        elif os.path.islink(file.path):
-            return [FileGuess(filetypes.mime_symlink)]
+        if file.basename == "CMakeLists.txt":
+            return [FileGuess(filetypes.build_cmake)]
+        elif file.basename == "Makefile":
+            return [FileGuess(filetypes.build_gnu_make)]
+        elif file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
+             file.extension == ".cxx" or file.extension == ".cc" or file.extension == ".hxx":
+            return [guess_source_file(filetypes.mime_cpp, file)]
+
+class Guesser_Generic(Guesser):
+    def guess(self, file):
+        if file.extension == ".txt":
+            return [FileGuess(filetypes.mime_text_plain)]
 
 class Guesser_Git(Guesser):
     def guess(self, file):
@@ -85,6 +102,31 @@ class Guesser_Git(Guesser):
         elif file.basename == ".gitattributes":
             return [FileGuess(filetypes.mime_gitattributes)]
 
+class Guesser_Inode(Guesser):
+    def guess(self, file):
+        if file.is_directory():
+            return [FileGuess(filetypes.mime_directory)]
+        elif os.path.islink(file.path):
+            return [FileGuess(filetypes.mime_symlink)]
+        
+class Guesser_Java(Guesser):
+    def guess(self, file):
+        if file.basename == "gradlew" or file.basename == "gradlew.bat" or file.basename == "gradle.properties" or file.basename == "build.gradle":
+            return [FileGuess(filetypes.build_gradle)]
+        elif file.extension == ".java":
+            return [guess_source_file(filetypes.mime_java, file)]
+
+class Guesser_JavaScript(Guesser):
+    def guess(self, file):
+        if file.basename == "package.json" or file.basename == "package-lock.json":
+            return [FileGuess(filetypes.build_node_js)]
+        elif file.basename == "node_modules":
+            return [FileGuess(filetypes.build_node_js, special=True)]
+        elif re.search("^gulpfile\..*\.js$", file.basename):
+            return [FileGuess(filetypes.build_gulp)]
+        elif file.extension == ".js":
+            return [guess_source_file(filetypes.mime_js, file)]
+
 class Guesser_Python(Guesser):
     def guess(self, file):
         if file.basename == "__pycache__":
@@ -92,13 +134,11 @@ class Guesser_Python(Guesser):
         elif file.extension == ".py":
             return [guess_source_file(filetypes.mime_python, file)]
 
-class Guesser_Generic(Guesser):
-    def guess(self, file):
-        if file.extension == ".txt":
-            return [FileGuess(filetypes.mime_text_plain)]
-
 def register_all_guessers(registry):
+    registry.register_file_type_guesser(Guesser_Cpp())
     registry.register_file_type_guesser(Guesser_Generic())
     registry.register_file_type_guesser(Guesser_Git())
     registry.register_file_type_guesser(Guesser_Inode())
+    registry.register_file_type_guesser(Guesser_Java())
+    registry.register_file_type_guesser(Guesser_JavaScript())
     registry.register_file_type_guesser(Guesser_Python())
