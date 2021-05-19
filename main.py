@@ -3,14 +3,14 @@ import os
 import sys
 import time
 
-from ps.files import *
-from ps.util import *
+from ps.detector import DetectorRegistry
+from ps.files import Directory, FileDescriptorManager
         
 def main():
     FileDescriptorManager()
     
-    fileList = Directory(".")
-    print(fileList)
+    file_list = Directory(".")
+    print(file_list)
     print(len(FileDescriptorManager.instance.descriptors))
 
 if __name__ == "__main__":
