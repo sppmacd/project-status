@@ -4,13 +4,15 @@ import sys
 
 from enum import Enum
 
+from .logging import *
+
 class FileGuess:
     def __init__(self, file_type=None, **attributes):
         self.file_type = file_type
         self.attributes = attributes
         
     def __repr__(self):
-        return "<" + str(self.file_type) + "; attributes: " + str(self.attributes) + ">"
+        return sgr("1", "FileGuess") + " { " + sgr("3;34", "type: ") + str(self.file_type) + "; " + sgr("3;34", "attributes: ") + str(self.attributes) + " }"
 
     def is_special(self):
         return self.attributes.get("special")
@@ -39,7 +41,7 @@ class FileType:
         self.value = value
     
     def __repr__(self):
-        return self.clazz + " (=" + self.value + ")"
+        return sgr("1;33", self.clazz) + " (" + sgr("3;32", self.value) + ")"
 
 class filetypes:
     

@@ -5,15 +5,15 @@ import time
 
 from ps.detector import DetectorRegistry
 from ps.files import Directory, FileDescriptorManager
+from ps.logging import *
         
 def main():
     FileDescriptorManager()
     
     file_list = Directory(".")
     print(file_list)
-    print(len(FileDescriptorManager.instance.descriptors))
 
 if __name__ == "__main__":
     main()
 else:
-    print("Importing not supported")
+    print_error(sgr("31", "Importing as module not supported!"))

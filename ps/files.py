@@ -2,6 +2,7 @@ import os
 
 from .util import *
 from .detector import DetectorRegistry
+from .logging import *
 
 class FileDescriptorManager:
     instance = None
@@ -58,7 +59,7 @@ class File:
         self.type_guesses = None
         
     def __str__(self, depth=0):
-        return depth_indent(depth) + self.path + ": " + str(self.file_type()) + "\n"
+        return depth_indent(depth) + sgr("33", self.path) + sgr("90", " -> ") + str(self.file_type()) + "\n"
     
     def is_directory(self):
         return False

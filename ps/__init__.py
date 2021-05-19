@@ -1,1 +1,1 @@
-__all__ = ["detector", "guessers", "files", "util"]
+__all__ = ["detector", "files", "guessers", "logging", "util"]
