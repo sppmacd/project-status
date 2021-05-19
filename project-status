@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Manage your projects.")
     parser.add_argument("path", nargs="?", help="Path to scan", default=".")
     parser.add_argument("--disable-formatting", help="Disable output formatting", action="store_true")
-    parser.add_argument("--display-tree", "-t", help="[action] Display filesystem tree", action="store_true")
+    parser.add_argument("--display-tree", "-t", help="[action] Display filesystem tree with guessed file types", action="store_true")
     parser.add_argument("--verbose", "-v", help="Print what is done", action="store_true")
     
     return parser.parse_args()
@@ -28,7 +28,7 @@ def main(args):
         ps.logging.print_error("You must specify action!")
         sys.exit(1)
     
-    file_list = Directory(args.path)
+    file_list = Directory(None, args.path)
     
     if args.display_tree:
         print(file_list)

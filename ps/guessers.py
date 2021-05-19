@@ -24,6 +24,7 @@ class FileGuess:
         return self.attributes.get("lines_of_code")
 
 def guess_source_file(filetype, file):
+    
     with file.descriptor() as file:
         lines_of_code = sum(1 for _ in file)
 
@@ -59,14 +60,18 @@ class filetypes:
     # Build systems
     build_python =  FileType(FileType.Class.BuildSystem, "python")
 
-class Guesser_Inode:
+class Guesser:
+    def guess(self, file):
+        return []
+
+class Guesser_Inode(Guesser):
     def guess(self, file):
         if file.is_directory():
             return [FileGuess(filetypes.mime_directory)]
         elif os.path.islink(file.path):
             return [FileGuess(filetypes.mime_symlink)]
 
-class Guesser_Git:
+class Guesser_Git(Guesser):
     def guess(self, file):
         if file.basename == ".git":
             return [FileGuess(filetypes.version_git, special=True)]
@@ -75,14 +80,14 @@ class Guesser_Git:
         elif file.basename == ".gitattributes":
             return [FileGuess(filetypes.mime_gitattributes)]
 
-class Guesser_Python:
+class Guesser_Python(Guesser):
     def guess(self, file):
         if file.basename == "__pycache__":
             return [FileGuess(filetypes.build_python, special=True)]
         elif file.extension == ".py":
             return [guess_source_file(filetypes.mime_python, file)]
 
-class Guesser_Generic:
+class Guesser_Generic(Guesser):
     def guess(self, file):
         if file.extension == ".txt":
             return [FileGuess(filetypes.mime_text_plain)]

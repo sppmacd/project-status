@@ -1,8 +1,9 @@
 import os
 
-from .util import *
 from .detector import DetectorRegistry
+from .guessers import FileType
 from .logging import *
+from .util import *
 
 class FileDescriptorManager:
     instance = None
@@ -51,8 +52,9 @@ class FileDescriptorManager:
             raise AssertionError("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
 
 class File:
-    def __init__(self, path):
+    def __init__(self, parent, path):
         self.path = path
+        self.parent = parent
         self.basename = os.path.basename(path)
         self.extension = os.path.splitext(path)[1]
         self.type_guesses = None
@@ -81,9 +83,10 @@ class File:
             return FileDescriptorManager.instance.get_by_path(self.path)
 
 class Directory(File):
-    def __init__(self, path):
-        File.__init__(self, path)
+    def __init__(self, parent, path):
+        File.__init__(self, parent, path)
         self.files = {}
+        self.m_is_project = None
         
         if not self.should_traverse_into():
             print_verbose("Special path: " + path)
@@ -91,12 +94,14 @@ class Directory(File):
         
         for file in os.listdir(path):
             if os.path.isdir(path + "/" + file):
-                self.files[file] = Directory(path + "/" + file)
+                self.files[file] = Directory(self, path + "/" + file)
             else:
-                self.files[file] = File(path + "/" + file)
+                self.files[file] = File(self, path + "/" + file)
             
     def __str__(self, depth=0):
         out = File.__str__(self, depth)
+        out = out[:-1]
+        out += (sgr("1;32", " (IS LIKELY A PROJECT)\n") if self.is_project() else "\n")
         for value in self.files.values():
             out = out + value.__str__(depth + 1)
         return out
@@ -104,5 +109,22 @@ class Directory(File):
     def is_directory(self):
         return True
     
+    def is_project(self):
+        print_verbose("is_project " + self.path)
+        if self.m_is_project == None:
+            if self.parent != None and self.parent.is_project():
+                print_verbose("nested project") # Don't allow nested projects for now.
+                self.m_is_project = False
+                return self.m_is_project 
+            
+            has_non_mimetype_guess = False
+            for file in self.files.values():
+                for guess in file.file_type():
+                    if guess.file_type.clazz != FileType.Class.MimeType:
+                        has_non_mimetype_guess = True
+                
+            self.m_is_project = has_non_mimetype_guess
+        return self.m_is_project
+        
     def should_traverse_into(self):
         return not self.is_special()
