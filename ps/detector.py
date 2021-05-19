@@ -13,14 +13,16 @@ class DetectorRegistry:
         else:
             raise AssertionError("Double singleton")
         
-        self.file_type_guessers = []
+        self.file_type_guessers = {}
         
-    def register_file_type_guesser(self, guesser):
-        self.file_type_guessers.append(guesser)
+    def register_file_type_guesser(self, name, guesser):
+        self.file_type_guessers[name] = guesser
         
     def guess_file_type(self, file):
         matching_guesses = []
-        for guesser in self.file_type_guessers:
+        for name, guesser in self.file_type_guessers.items():
+            if name in config.args.exclude:
+                continue
             guess = guesser.guess(file)
             if guess != None:
                 matching_guesses += guess

@@ -20,6 +20,7 @@ def parse_args():
     # display-tree
     sp_display_tree = subparsers.add_parser("display-tree", help="display filesystem tree with guesses")
     sp_display_tree.add_argument("path", nargs="?", help="path to display", default=".")
+    sp_display_tree.add_argument("--exclude", "-x", help="exclude specific file types")
     
     # version
     sp_version = subparsers.add_parser("version", help="display version")
@@ -32,6 +33,7 @@ def main(args):
         sys.exit(0)
     
     config.args = args
+    config.args.exclude = config.args.exclude.split(",")
     
     FileDescriptorManager()
     

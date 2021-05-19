@@ -135,10 +135,10 @@ class Guesser_Python(Guesser):
             return [guess_source_file(filetypes.mime_python, file)]
 
 def register_all_guessers(registry):
-    registry.register_file_type_guesser(Guesser_Cpp())
-    registry.register_file_type_guesser(Guesser_Generic())
-    registry.register_file_type_guesser(Guesser_Git())
-    registry.register_file_type_guesser(Guesser_Inode())
-    registry.register_file_type_guesser(Guesser_Java())
-    registry.register_file_type_guesser(Guesser_JavaScript())
-    registry.register_file_type_guesser(Guesser_Python())
+    registry.register_file_type_guesser("cpp",     Guesser_Cpp())
+    registry.register_file_type_guesser("generic", Guesser_Generic())
+    registry.register_file_type_guesser("git",     Guesser_Git())
+    registry.register_file_type_guesser("inode",   Guesser_Inode())
+    registry.register_file_type_guesser("java",    Guesser_Java())
+    registry.register_file_type_guesser("js",      Guesser_JavaScript())
+    registry.register_file_type_guesser("python",  Guesser_Python())
