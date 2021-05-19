@@ -33,7 +33,7 @@ class FileDescriptorManager:
         print_verbose("open_and_push_file " + path)
         if len(self.descriptor_queue) + 1 > self.maxfds:
             fd = self.descriptor_queue[0]
-            print_verbose("too much fds opened, removing ", fd)
+            print_verbose("too much fds opened, removing " + str(fd))
             oldpath = fd.name
             fd.close()
             del self.descriptor_queue[0]
@@ -44,12 +44,9 @@ class FileDescriptorManager:
             self.descriptor_queue.append(fd)
             self.descriptors[path] = len(self.descriptor_queue)
             return fd
-        except PermissionError:
+        except OSError:
             excinfo = sys.exc_info()[1]
             print_error("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
-        except:
-            excinfo = sys.exc_info()[1]
-            raise AssertionError("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
 
 class File:
     def __init__(self, parent, path):
@@ -84,6 +81,7 @@ class File:
 
 class Directory(File):
     def __init__(self, parent, path):
+        print_verbose(path)
         File.__init__(self, parent, path)
         self.files = {}
         self.m_is_project = None
@@ -92,11 +90,15 @@ class Directory(File):
             print_verbose("Special path: " + path)
             return
         
-        for file in os.listdir(path):
-            if os.path.isdir(path + "/" + file):
-                self.files[file] = Directory(self, path + "/" + file)
-            else:
-                self.files[file] = File(self, path + "/" + file)
+        try:
+            for file in os.listdir(path):
+                if os.path.isdir(path + "/" + file):
+                    self.files[file] = Directory(self, path + "/" + file)
+                else:
+                    self.files[file] = File(self, path + "/" + file)
+        except OSError:
+            excinfo = sys.exc_info()[1]
+            print_error("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
             
     def __str__(self, depth=0):
         out = File.__str__(self, depth)

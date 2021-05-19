@@ -40,7 +40,12 @@ def main(args):
     if args.command == "display-tree":
         print(file_list)
 
-if __name__ == "__main__":
-    main(parse_args())
-else:
-    print_error(ps.logging.sgr("31", "Importing as module not supported!"))
+try:
+    if __name__ == "__main__":
+        main(parse_args())
+    else:
+        ps.logging.print_error("Importing as module not supported!")
+except KeyboardInterrupt:
+    ps.logging.print_error("Interrupted :(")
+except:
+    ps.logging.print_error("Exception :(")
