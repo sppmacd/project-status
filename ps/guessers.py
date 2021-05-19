@@ -2,6 +2,8 @@ import os
 import stat
 import sys
 
+import config as config
+
 from enum import Enum
 
 from .logging import *
