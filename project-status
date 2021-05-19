@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 import time
+import traceback
 
 from ps.detector import DetectorRegistry
 from ps.files import Directory, FileDescriptorManager
@@ -20,7 +21,11 @@ def parse_args():
     # display-tree
     sp_display_tree = subparsers.add_parser("display-tree", help="display filesystem tree with guesses")
     sp_display_tree.add_argument("path", nargs="?", help="path to display", default=".")
-    sp_display_tree.add_argument("--exclude", "-x", help="exclude specific file types")
+    sp_display_tree.add_argument("--exclude", "-x", help="exclude specific file types (guessers)")
+    
+    # config
+    sp_config = subparsers.add_parser("config", help="get/set various config options")
+    sp_config.add_argument("name", help="Config option name", choices=["guessers"])
     
     # version
     sp_version = subparsers.add_parser("version", help="display version")
@@ -31,15 +36,19 @@ def main(args):
     if args.command == "version":
         print("Project Status v1.0\nCopyright (c) Sppmacd 2021")
         sys.exit(0)
+    elif args.command == "config":
+        if args.name == "guessers":
+            for name, value in DetectorRegistry.instance.file_type_guessers.items():
+                print(" * " + ps.logging.sgr("1", name))
+        sys.exit(0)
     
     config.args = args
-    config.args.exclude = config.args.exclude.split(",")
     
     FileDescriptorManager()
     
-    file_list = Directory(None, args.path)
-    
     if args.command == "display-tree":
+        config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
+        file_list = Directory(None, args.path)
         print(file_list)
 
 try:
@@ -53,3 +62,4 @@ except SystemExit:
     pass
 except:
     print("Exception :( " + str(sys.exc_info()))
+    traceback.print_exc()
