@@ -70,7 +70,7 @@ class File:
     
     def is_special(self):
         for guess in self.file_type():
-            if guess.is_special:
+            if guess.is_special():
                 return True
         return False
     

@@ -5,12 +5,27 @@ import sys
 from enum import Enum
 
 class FileGuess:
-    def __init__(self, file_type=None, is_special=False):
-        self.is_special = is_special
+    def __init__(self, file_type=None, **attributes):
         self.file_type = file_type
+        self.attributes = attributes
         
     def __repr__(self):
-        return str(self.file_type) + ": special: " + str(self.is_special)
+        return "<" + str(self.file_type) + "; attributes: " + str(self.attributes) + ">"
+
+    def is_special(self):
+        return self.attributes.get("special")
+    
+    def is_source(self):
+        return self.attributes.get("source")
+    
+    def lines_of_code(self):
+        return self.attributes.get("lines_of_code")
+
+def guess_source_file(filetype, file):
+    with file.descriptor() as file:
+        lines_of_code = sum(1 for _ in file)
+
+    return FileGuess(filetype, source=True, lines_of_code=lines_of_code)
 
 class FileType:
     class Class:
@@ -52,7 +67,7 @@ class Guesser_Inode:
 class Guesser_Git:
     def guess(self, file):
         if file.basename == ".git":
-            return [FileGuess(filetypes.version_git, True)]
+            return [FileGuess(filetypes.version_git, special=True)]
         elif file.basename == ".gitignore":
             return [FileGuess(filetypes.mime_gitignore)]
         elif file.basename == ".gitattributes":
@@ -61,9 +76,9 @@ class Guesser_Git:
 class Guesser_Python:
     def guess(self, file):
         if file.basename == "__pycache__":
-            return [FileGuess(filetypes.build_python, True)]
+            return [FileGuess(filetypes.build_python, special=True)]
         elif file.extension == ".py":
-            return [FileGuess(filetypes.mime_python)]
+            return [guess_source_file(filetypes.mime_python, file)]
 
 class Guesser_Generic:
     def guess(self, file):
