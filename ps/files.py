@@ -29,10 +29,10 @@ class FileDescriptorManager:
             return fd
             
     def open_and_push_file(self, path):
-        print_error("open_and_push_file " + path)
+        print_verbose("open_and_push_file " + path)
         if len(self.descriptor_queue) + 1 > self.maxfds:
             fd = self.descriptor_queue[0]
-            print_error("too much fds opened, removing ", fd)
+            print_verbose("too much fds opened, removing ", fd)
             oldpath = fd.name
             fd.close()
             del self.descriptor_queue[0]
@@ -86,7 +86,7 @@ class Directory(File):
         self.files = {}
         
         if not self.should_traverse_into():
-            print_error("Special path: " + path)
+            print_verbose("Special path: " + path)
             return
         
         for file in os.listdir(path):
