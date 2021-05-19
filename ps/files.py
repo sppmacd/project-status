@@ -105,7 +105,8 @@ class Directory(File):
         out = out[:-1]
         out += (sgr("1;32", " (IS LIKELY A PROJECT)\n") if self.is_project() else "\n")
         for value in self.files.values():
-            out = out + value.__str__(depth + 1)
+            if len(value.file_type()) > 0:
+                out = out + value.__str__(depth + 1)
         return out
     
     def is_directory(self):
