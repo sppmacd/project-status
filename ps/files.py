@@ -29,15 +29,14 @@ class FileDescriptorManager:
             return fd
             
     def open_and_push_file(self, path):
-        print("open_and_push_file " + path)
+        print_error("open_and_push_file " + path)
         if len(self.descriptor_queue) + 1 > self.maxfds:
             fd = self.descriptor_queue[0]
-            print("too much fds opened, removing ", fd)
+            print_error("too much fds opened, removing ", fd)
             oldpath = fd.name
             fd.close()
             del self.descriptor_queue[0]
             del self.descriptors[oldpath]
-            print(self.descriptor_queue)
 
         try:
             fd = open(path)
@@ -46,7 +45,7 @@ class FileDescriptorManager:
             return fd
         except PermissionError:
             excinfo = sys.exc_info()[1]
-            print("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
+            print_error("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
         except:
             excinfo = sys.exc_info()[1]
             raise AssertionError("Failed to open file " + excinfo.filename + ": " + excinfo.strerror)
@@ -87,7 +86,7 @@ class Directory(File):
         self.files = {}
         
         if not self.should_traverse_into():
-            print("Special path: " + path)
+            print_error("Special path: " + path)
             return
         
         for file in os.listdir(path):
