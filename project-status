@@ -47,5 +47,7 @@ try:
         ps.logging.print_error("Importing as module not supported!")
 except KeyboardInterrupt:
     ps.logging.print_error("Interrupted :(")
+except SystemExit:
+    pass
 except:
-    ps.logging.print_error("Exception :( " + str(sys.exc_info()))
+    print("Exception :( " + str(sys.exc_info()))
