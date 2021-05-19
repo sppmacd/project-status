@@ -48,4 +48,4 @@ try:
 except KeyboardInterrupt:
     ps.logging.print_error("Interrupted :(")
 except:
-    ps.logging.print_error("Exception :(")
+    ps.logging.print_error("Exception :( " + str(sys.exc_info()))
