@@ -125,10 +125,9 @@ class Directory(File):
         return True
     
     def is_project(self):
-        print_verbose("is_project " + self.path)
         if self.m_is_project == None:
             if self.parent != None and self.parent.is_project():
-                print_verbose("nested project") # Don't allow nested projects for now.
+                # Don't allow nested projects for now.
                 self.m_is_project = False
                 return self.m_is_project 
             
