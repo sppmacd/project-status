@@ -68,7 +68,6 @@ class File:
     def guesses(self):
         if self.type_guesses == None:
             self.type_guesses = self.generate_guesses()
-            print("generate_guesses", self.path, self.type_guesses)
         return self.type_guesses
     
     def collapsed_guesses(self):
@@ -172,7 +171,6 @@ class Directory(File):
                 # If guess matches, collapse attributes
                 if guess != None:
                     for name, value in other_guess.attributes.items():
-                        print("collapse_attribute", name, value, guess)
                         guess.collapse_attribute(name, value)
                 # Else, create a new guess
                 else:
@@ -182,7 +180,6 @@ class Directory(File):
                     
                     # Try to collapse attributes
                     for name, value in other_guess.attributes.items():
-                        print("collapse_attribute", name, value, guess)
                         guess.collapse_attribute(name, value)
 
         return guesses
