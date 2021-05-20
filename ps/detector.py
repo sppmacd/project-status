@@ -21,7 +21,7 @@ class DetectorRegistry:
     def guess_file_type(self, file):
         matching_guesses = []
         for name, guesser in self.file_type_guessers.items():
-            if name in config.args.exclude:
+            if "/" + name in config.args.exclude:
                 continue
             guess = guesser.guess(file)
             if guess != None:

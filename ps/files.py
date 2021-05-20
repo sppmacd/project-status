@@ -201,7 +201,6 @@ class Directory(File):
     
     def should_be_excluded(self, filename):
         for exclude_pattern in config.args.exclude:
-            if not exclude_pattern.empty() and not exclude_pattern.startswith("/") and fnmatch.fnmatch(filename, exclude_pattern):
-                print("EXCLUDE")
+            if len(exclude_pattern) > 0 and not exclude_pattern.startswith("/") and fnmatch.fnmatch(filename, exclude_pattern):
                 return True
         return False

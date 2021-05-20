@@ -21,7 +21,7 @@ def parse_args():
     # display-tree
     sp_display_tree = subparsers.add_parser("display-tree", help="display filesystem tree with guesses")
     sp_display_tree.add_argument("path", nargs="?", help="path to display", default=".")
-    sp_display_tree.add_argument("--exclude", "-x", help="exclude specific file types (guessers)")
+    sp_display_tree.add_argument("--exclude", "-x", help="exclude specific files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     
     # config
     sp_config = subparsers.add_parser("config", help="get/set various config options")
@@ -30,7 +30,7 @@ def parse_args():
     # list
     sp_list = subparsers.add_parser("list", help="list projects in directory")
     sp_list.add_argument("path", nargs="?", help="path to list projects from", default=".")
-    sp_list.add_argument("--exclude", "-x", help="exclude specific file types (guessers)")
+    sp_list.add_argument("--exclude", "-x", help="exclude specific files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     
     # version
     sp_version = subparsers.add_parser("version", help="display version")
