@@ -177,9 +177,9 @@ class Guesser_Git(Guesser):
 class Guesser_Image(Guesser):
     def guess(self, file):
         if file.extension == ".jpg":
-            return [guess_source_file(filetypes.mime_jpg, file)]
+            return [FileGuess(filetypes.mime_jpg)]
         elif file.extension == ".png":
-            return [guess_source_file(filetypes.mime_png, file)]
+            return [FileGuess(filetypes.mime_png)]
 
 class Guesser_Inode(Guesser):
     def guess(self, file):
