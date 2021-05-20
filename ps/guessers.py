@@ -2,6 +2,7 @@ import os
 import re
 import stat
 import sys
+import traceback
 
 import config as config
 
@@ -16,6 +17,25 @@ class FileGuess:
         
     def __repr__(self):
         return sgr("1", "FileGuess") + " { " + sgr("3;34", "type: ") + str(self.file_type) + "; " + sgr("3;34", "attributes: ") + str(self.attributes) + " }"
+    
+    def to_user_readable_string(self):
+        output = ""
+        output += self.file_type.to_user_readable_string() + "\n"
+        
+        for name, value in self.attributes.items():
+            output += "   - " + name + ": " + str(value) + "\n"
+        
+        return output
+
+    def collapse_attribute(self, name, value):
+        if not name in self.attributes:
+            self.attributes[name] = value
+            return
+
+        if isinstance(self.attributes[name], bool):
+            self.attributes[name] |= value
+        elif isinstance(self.attributes[name], int):
+            self.attributes[name] += value
 
     def is_special(self):
         return self.attributes.get("special")
@@ -53,6 +73,25 @@ class FileType:
     
     def __repr__(self):
         return sgr("1;33", self.clazz) + " (" + sgr("3;32", self.value) + ")"
+    
+    def to_user_readable_string(self):
+        output = ""
+        
+        # FIXME: Make it better!
+        if self.clazz == FileType.Class.MimeType:
+            output += "MIME Type"
+        elif self.clazz == FileType.Class.VersionControl:
+            output += "Version control"
+        elif self.clazz == FileType.Class.BuildSystem:
+            output += "Build system"
+        elif self.clazz == FileType.Class.ContinuousIntegration:
+            output += "Continuous Integration"
+        
+        output = sgr("1;32", output)
+        
+        output += ": "
+        output += sgr("3;35", self.value)
+        return output
 
 class filetypes:
     
@@ -61,11 +100,11 @@ class filetypes:
     mime_directory = FileType(FileType.Class.MimeType, "inode/directory")
     mime_gitignore = FileType(FileType.Class.MimeType, "custom$git/ignore")
     mime_gitattributes = FileType(FileType.Class.MimeType, "custom$git/attributes")
-    mime_java = FileType(FileType.Class.MimeType, "custom$/java")
+    mime_java = FileType(FileType.Class.MimeType, "text/x-java-source")
     mime_js = FileType(FileType.Class.MimeType, "application/js")
     mime_python = FileType(FileType.Class.MimeType, "application/x-python")
     mime_symlink = FileType(FileType.Class.MimeType, "inode/symlink")
-    mime_text_plain = FileType(FileType.Class.MimeType, "text/x-java-source")
+    mime_text_plain = FileType(FileType.Class.MimeType, "text/plain")
     
     # Version controls
     version_git = FileType(FileType.Class.VersionControl, "git")
