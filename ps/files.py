@@ -128,6 +128,16 @@ class Directory(File):
                 
             self.m_is_project = has_non_mimetype_guess
         return self.m_is_project
+    
+    def print_as_project(self):
+        print(self.path, "(Project)" if self.is_project() else "")
+    
+    def print_projects(self):
+        if self.is_project():
+            self.print_as_project()
+        for file in self.files.values():
+            if file.is_directory():
+                file.print_projects()
         
     def should_traverse_into(self):
         return not self.is_special()

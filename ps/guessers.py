@@ -31,8 +31,12 @@ def guess_source_file(filetype, file):
     if config.args.no_open:
         lines_of_code = 0
     else:
-        with file.descriptor() as file:
-            lines_of_code = sum(1 for _ in file)
+        fd = file.descriptor()
+        if fd != None:
+            with fd as _file:
+                lines_of_code = sum(1 for _ in _file)
+        else:
+            lines_of_code = 0
 
     return FileGuess(filetype, source=True, lines_of_code=lines_of_code)
 

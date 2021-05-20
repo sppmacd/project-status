@@ -27,6 +27,11 @@ def parse_args():
     sp_config = subparsers.add_parser("config", help="get/set various config options")
     sp_config.add_argument("name", help="Config option name", choices=["guessers"])
     
+    # list
+    sp_list = subparsers.add_parser("list", help="list projects in directory")
+    sp_list.add_argument("path", nargs="?", help="path to list projects from", default=".")
+    sp_list.add_argument("--exclude", "-x", help="exclude specific file types (guessers)")
+    
     # version
     sp_version = subparsers.add_parser("version", help="display version")
 
@@ -50,6 +55,10 @@ def main(args):
         config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
         file_list = Directory(None, args.path)
         print(file_list)
+    elif args.command == "list":
+        config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
+        file_list = Directory(None, args.path)
+        file_list.print_projects()
 
 try:
     if __name__ == "__main__":
