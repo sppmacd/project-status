@@ -132,10 +132,21 @@ class filetypes:
     build_gulp = FileType(FileType.Class.BuildSystem,       "gulp", "Gulp")
     build_node_js = FileType(FileType.Class.BuildSystem,    "node_js", "Node.js")
     build_python =  FileType(FileType.Class.BuildSystem,    "python", "Python (__pycache__)")
+    
+    # CI
+    ci_github_actions = FileType(FileType.Class.ContinuousIntegration, "github_actions", "GitHub Actions")
+    ci_travis = FileType(FileType.Class.ContinuousIntegration,         "travis", "Travis")
 
 class Guesser:
     def guess(self, file):
         return []
+    
+class Guesser_CI:
+    def guess(self, file):
+        if file.basename == "travis.yml":
+            return [FileGuess(filetypes.ci_travis)]
+        if file.parent != None and file.parent.basename == ".github" and file.basename == "workflows":
+            return [FileGuess(filetypes.ci_github_actions, special=True)]
 
 class Guesser_Cpp(Guesser):
     def guess(self, file):
@@ -218,6 +229,7 @@ class Guesser_Web(Guesser):
         
 
 def register_all_guessers(registry):
+    registry.register_file_type_guesser("ci",      Guesser_CI())
     registry.register_file_type_guesser("cpp",     Guesser_Cpp())
     registry.register_file_type_guesser("generic", Guesser_Generic())
     registry.register_file_type_guesser("git",     Guesser_Git())
