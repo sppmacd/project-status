@@ -41,7 +41,7 @@ class FileDescriptorManager:
             del self.descriptors[oldpath]
 
         try:
-            fd = open(path)
+            fd = open(path, mode="rb")
             self.descriptor_queue.append(fd)
             self.descriptors[path] = len(self.descriptor_queue)
             return fd
