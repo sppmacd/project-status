@@ -75,9 +75,10 @@ class FileType:
         BuildSystem = "$build"
         ContinuousIntegration = "$ci"
     
-    def __init__(self, clazz, value):
+    def __init__(self, clazz, value, user_readable_value=None):
         self.clazz = clazz
         self.value = value
+        self.user_readable_value = user_readable_value if user_readable_value != None else value
     
     def __repr__(self):
         return sgr("1;33", self.clazz) + " (" + sgr("3;32", self.value) + ")"
@@ -98,38 +99,39 @@ class FileType:
         output = sgr("1;32", output)
         
         output += ": "
-        output += sgr("3;35", self.value)
+        output += sgr("3;35", self.user_readable_value)
+        output += sgr("3;36", " (" + self.value + ")")
         return output
 
 class filetypes:
     
     # MIME types
-    mime_cpp = FileType(FileType.Class.MimeType, "text/x-c")
-    mime_css = FileType(FileType.Class.MimeType, "text/css")
-    mime_directory = FileType(FileType.Class.MimeType, "inode/directory")
-    mime_gitignore = FileType(FileType.Class.MimeType, "custom$git/ignore")
-    mime_gitattributes = FileType(FileType.Class.MimeType, "custom$git/attributes")
-    mime_html = FileType(FileType.Class.MimeType, "text/html")
-    mime_java = FileType(FileType.Class.MimeType, "text/x-java-source")
-    mime_jpg = FileType(FileType.Class.MimeType, "image/jpg")
-    mime_js = FileType(FileType.Class.MimeType, "application/js")
-    mime_markdown = FileType(FileType.Class.MimeType, "custom$markdown")
-    mime_php = FileType(FileType.Class.MimeType, "custom$php")
-    mime_png = FileType(FileType.Class.MimeType, "image/png")
-    mime_python = FileType(FileType.Class.MimeType, "application/x-python")
-    mime_symlink = FileType(FileType.Class.MimeType, "inode/symlink")
-    mime_text_plain = FileType(FileType.Class.MimeType, "text/plain")
+    mime_cpp = FileType(FileType.Class.MimeType,            "text/x-c", "C/C++")
+    mime_css = FileType(FileType.Class.MimeType,            "text/css", "CSS")
+    mime_directory = FileType(FileType.Class.MimeType,      "inode/directory", "Directory")
+    mime_gitignore = FileType(FileType.Class.MimeType,      "custom$git/ignore", ".gitignore file")
+    mime_gitattributes = FileType(FileType.Class.MimeType,  "custom$git/attributes", ".gitattributes file")
+    mime_html = FileType(FileType.Class.MimeType,           "text/html", "HTML")
+    mime_java = FileType(FileType.Class.MimeType,           "text/x-java-source", "Java")
+    mime_jpg = FileType(FileType.Class.MimeType,            "image/jpg", "JPG image")
+    mime_js = FileType(FileType.Class.MimeType,             "application/js", "JavaScript")
+    mime_markdown = FileType(FileType.Class.MimeType,       "custom$markdown", "Markdown")
+    mime_php = FileType(FileType.Class.MimeType,            "custom$php", "PHP")
+    mime_png = FileType(FileType.Class.MimeType,            "image/png", "PNG image")
+    mime_python = FileType(FileType.Class.MimeType,         "application/x-python", "Python")
+    mime_symlink = FileType(FileType.Class.MimeType,        "inode/symlink", "Symlink")
+    mime_text_plain = FileType(FileType.Class.MimeType,     "text/plain", "Plain text")
     
     # Version controls
-    version_git = FileType(FileType.Class.VersionControl, "git")
+    version_git = FileType(FileType.Class.VersionControl,   "git", "Git")
                   
     # Build systems
-    build_cmake =  FileType(FileType.Class.BuildSystem, "cmake")
-    build_gnu_make = FileType(FileType.Class.BuildSystem, "gnu_make")
-    build_gradle = FileType(FileType.Class.BuildSystem, "gradle")
-    build_gulp = FileType(FileType.Class.BuildSystem, "gulp")
-    build_node_js = FileType(FileType.Class.BuildSystem, "node_js")
-    build_python =  FileType(FileType.Class.BuildSystem, "python")
+    build_cmake =  FileType(FileType.Class.BuildSystem,     "cmake", "CMake")
+    build_gnu_make = FileType(FileType.Class.BuildSystem,   "gnu_make", "GNU Make")
+    build_gradle = FileType(FileType.Class.BuildSystem,     "gradle", "Gradle")
+    build_gulp = FileType(FileType.Class.BuildSystem,       "gulp", "Gulp")
+    build_node_js = FileType(FileType.Class.BuildSystem,    "node_js", "Node.js")
+    build_python =  FileType(FileType.Class.BuildSystem,    "python", "Python (__pycache__)")
 
 class Guesser:
     def guess(self, file):
