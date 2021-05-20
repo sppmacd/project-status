@@ -104,11 +104,17 @@ class filetypes:
     
     # MIME types
     mime_cpp = FileType(FileType.Class.MimeType, "text/x-c")
+    mime_css = FileType(FileType.Class.MimeType, "text/css")
     mime_directory = FileType(FileType.Class.MimeType, "inode/directory")
     mime_gitignore = FileType(FileType.Class.MimeType, "custom$git/ignore")
     mime_gitattributes = FileType(FileType.Class.MimeType, "custom$git/attributes")
+    mime_html = FileType(FileType.Class.MimeType, "text/html")
     mime_java = FileType(FileType.Class.MimeType, "text/x-java-source")
+    mime_jpg = FileType(FileType.Class.MimeType, "image/jpg")
     mime_js = FileType(FileType.Class.MimeType, "application/js")
+    mime_markdown = FileType(FileType.Class.MimeType, "custom$markdown")
+    mime_php = FileType(FileType.Class.MimeType, "custom$php")
+    mime_png = FileType(FileType.Class.MimeType, "image/png")
     mime_python = FileType(FileType.Class.MimeType, "application/x-python")
     mime_symlink = FileType(FileType.Class.MimeType, "inode/symlink")
     mime_text_plain = FileType(FileType.Class.MimeType, "text/plain")
@@ -154,6 +160,13 @@ class Guesser_Git(Guesser):
         elif file.basename == ".gitattributes":
             return [FileGuess(filetypes.mime_gitattributes)]
 
+class Guesser_Image(Guesser):
+    def guess(self, file):
+        if file.extension == ".jpg":
+            return [guess_source_file(filetypes.mime_jpg, file)]
+        elif file.extension == ".png":
+            return [guess_source_file(filetypes.mime_png, file)]
+
 class Guesser_Inode(Guesser):
     def guess(self, file):
         if file.is_directory():
@@ -179,6 +192,13 @@ class Guesser_JavaScript(Guesser):
         elif file.extension == ".js":
             return [guess_source_file(filetypes.mime_js, file)]
 
+class Guesser_Markup(Guesser):
+    def guess(self, file):
+        if file.extension == ".html" or file.extension == ".htm":
+            return [guess_source_file(filetypes.mime_html, file)]
+        elif file.extension == ".md":
+            return [guess_source_file(filetypes.mime_markdown, file)]
+
 class Guesser_Python(Guesser):
     def guess(self, file):
         if file.basename == "__pycache__":
@@ -186,11 +206,22 @@ class Guesser_Python(Guesser):
         elif file.extension == ".py":
             return [guess_source_file(filetypes.mime_python, file)]
 
+class Guesser_Web(Guesser):
+    def guess(self, file):
+        if file.extension == ".php":
+            return [guess_source_file(filetypes.mime_php, file)]
+        elif file.extension == ".css":
+            return [guess_source_file(filetypes.mime_css, file)]
+        
+
 def register_all_guessers(registry):
     registry.register_file_type_guesser("cpp",     Guesser_Cpp())
     registry.register_file_type_guesser("generic", Guesser_Generic())
     registry.register_file_type_guesser("git",     Guesser_Git())
+    registry.register_file_type_guesser("image",   Guesser_Image())
     registry.register_file_type_guesser("inode",   Guesser_Inode())
     registry.register_file_type_guesser("java",    Guesser_Java())
     registry.register_file_type_guesser("js",      Guesser_JavaScript())
+    registry.register_file_type_guesser("markup",  Guesser_Markup())
     registry.register_file_type_guesser("python",  Guesser_Python())
+    registry.register_file_type_guesser("web",     Guesser_Web())
