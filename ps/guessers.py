@@ -56,8 +56,12 @@ def guess_source_file(filetype, file):
     else:
         fd = file.descriptor()
         if fd != None:
-            with fd as _file:
-                lines_of_code = sum(1 for _ in _file)
+            try:
+                with fd as _file:
+                    lines_of_code = sum(1 for _ in _file)
+            except:
+                print_error(sys.exc_info())
+                lines_of_code = 0
         else:
             lines_of_code = 0
 
@@ -153,7 +157,7 @@ class Guesser_Inode(Guesser):
         if file.is_directory():
             return [FileGuess(filetypes.mime_directory, subfile_count=len(file.files.keys()))]
         elif os.path.islink(file.path):
-            return [FileGuess(filetypes.mime_symlink, target=os.path.readlink(file.path))]
+            return [FileGuess(filetypes.mime_symlink, target=os.readlink(file.path))]
         
 class Guesser_Java(Guesser):
     def guess(self, file):
