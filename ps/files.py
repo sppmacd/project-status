@@ -102,10 +102,11 @@ class Directory(File):
         
         try:
             for file in os.listdir(path):
-                if self.should_be_excluded(file):
+                isdir = os.path.isdir(path + "/" + file)
+                if self.should_be_excluded(file, isdir):
                     continue
                 
-                if os.path.isdir(path + "/" + file):
+                if isdir:
                     self.files[file] = Directory(self, path + "/" + file)
                 else:
                     self.files[file] = File(self, path + "/" + file)
@@ -199,8 +200,16 @@ class Directory(File):
     def should_traverse_into(self):
         return not self.is_special()
     
-    def should_be_excluded(self, filename):
+    def should_be_excluded(self, filename, isdir):
         for exclude_pattern in config.args.exclude:
             if len(exclude_pattern) > 0 and not exclude_pattern.startswith("/") and fnmatch.fnmatch(filename, exclude_pattern):
                 return True
+        if len(config.args.include) > 0 and not isdir:
+            non_guesser_count = 0
+            for include_pattern in config.args.include:
+                if not include_pattern.startswith("/"):
+                    non_guesser_count += 1
+                    if len(include_pattern) > 0 and fnmatch.fnmatch(filename, include_pattern):
+                        return False
+            return non_guesser_count > 0
         return False

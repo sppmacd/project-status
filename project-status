@@ -21,7 +21,8 @@ def parse_args():
     # display-tree
     sp_display_tree = subparsers.add_parser("display-tree", help="display filesystem tree with guesses")
     sp_display_tree.add_argument("path", nargs="?", help="path to display", default=".")
-    sp_display_tree.add_argument("--exclude", "-x", help="exclude specific files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_display_tree.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_display_tree.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     
     # config
     sp_config = subparsers.add_parser("config", help="get/set various config options")
@@ -30,12 +31,20 @@ def parse_args():
     # list
     sp_list = subparsers.add_parser("list", help="list projects in directory")
     sp_list.add_argument("path", nargs="?", help="path to list projects from", default=".")
-    sp_list.add_argument("--exclude", "-x", help="exclude specific files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_list.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_list.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     
     # version
     sp_version = subparsers.add_parser("version", help="display version")
 
     return parser.parse_args()
+
+def setup_directory():
+    config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
+    config.args.include = config.args.include.split(",") if config.args.include != None else []
+    
+    print("Setting up directory listing")
+    return Directory(None, config.args.path)
 
 def main(args):
     if args.command == "version":
@@ -52,12 +61,13 @@ def main(args):
     FileDescriptorManager()
     
     if args.command == "display-tree":
-        config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
-        file_list = Directory(None, args.path)
+        file_list = setup_directory()
+        print("Generating output")
         print(file_list)
+
     elif args.command == "list":
-        config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
-        file_list = Directory(None, args.path)
+        file_list = setup_directory()
+        print("Generating output")
         file_list.print_projects()
 
 try:

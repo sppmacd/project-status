@@ -20,9 +20,20 @@ class DetectorRegistry:
         
     def guess_file_type(self, file):
         matching_guesses = []
+        
+        """
+        If the file has multiple guesses, just one need to be in include/exclude list
+        # to be included/excluded.
+        """
         for name, guesser in self.file_type_guessers.items():
+            # Exclude/include
             if "/" + name in config.args.exclude:
                 continue
+
+            if len(config.args.include) > 0 and not "/" + name in config.args.include:
+                continue
+            
+            # Actual guess
             guess = guesser.guess(file)
             if guess != None:
                 for one_guess in guess:
