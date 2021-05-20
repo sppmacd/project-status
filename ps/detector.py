@@ -38,6 +38,7 @@ class DetectorRegistry:
             if guess != None:
                 for one_guess in guess:
                     one_guess.guesser = name
+                    one_guess.attributes["file_size"] = os.path.getsize(file.path)
                 matching_guesses += guess
                 
         if len(matching_guesses) == 0:
