@@ -88,7 +88,7 @@ class FileType:
         
         # FIXME: Make it better!
         if self.clazz == FileType.Class.MimeType:
-            output += "MIME Type"
+            output += "Format/Language"
         elif self.clazz == FileType.Class.VersionControl:
             output += "Version control"
         elif self.clazz == FileType.Class.BuildSystem:
