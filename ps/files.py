@@ -1,6 +1,8 @@
 import copy
+import fnmatch
 import os
 
+import config as config
 from .detector import DetectorRegistry
 from .guessers import FileType, FileGuess
 from .logging import *
@@ -58,7 +60,7 @@ class File:
         self.type_guesses = None
         
     def __str__(self, depth=0, **kwargs):
-        return depth_indent(depth) + sgr("33", self.path) + sgr("90", " -> ") + str(self.guesses()) + "\n"
+        return depth_indent(depth) + sgr("33", self.path) + sgr("90", " -> ") + str(self.collapsed_guesses()) + "\n"
     
     def is_directory(self):
         return False
@@ -66,6 +68,7 @@ class File:
     def guesses(self):
         if self.type_guesses == None:
             self.type_guesses = self.generate_guesses()
+            print("generate_guesses", self.path, self.type_guesses)
         return self.type_guesses
     
     def collapsed_guesses(self):
@@ -100,6 +103,9 @@ class Directory(File):
         
         try:
             for file in os.listdir(path):
+                if self.should_be_excluded(file):
+                    continue
+                
                 if os.path.isdir(path + "/" + file):
                     self.files[file] = Directory(self, path + "/" + file)
                 else:
@@ -115,7 +121,7 @@ class Directory(File):
     def __str__(self, depth=0, **kwargs):
         out = File.__str__(self, depth)
         out = out[:-1]
-        out += (sgr("1;32", " (IS LIKELY A PROJECT)\n") if self.is_project() else "\n")
+        out += (sgr("1;32", " (IS A PROJECT)\n") if self.should_display_as_project() else "\n")
         for value in self.files.values():
             if len(value.guesses()) > 0:
                 out = out + value.__str__(depth + 1)
@@ -125,20 +131,21 @@ class Directory(File):
         return True
     
     def is_project(self):
-        if self.m_is_project == None:
-            if self.parent != None and self.parent.is_project():
-                # Don't allow nested projects for now.
-                self.m_is_project = False
-                return self.m_is_project 
+        has_non_mimetype_guess = False
+        for file in self.files.values():
+            for guess in file.collapsed_guesses():
+                if guess.file_type.clazz != FileType.Class.MimeType:
+                    has_non_mimetype_guess = True
             
-            has_non_mimetype_guess = False
-            for file in self.files.values():
-                for guess in file.guesses():
-                    if guess.file_type.clazz != FileType.Class.MimeType:
-                        has_non_mimetype_guess = True
-                
-            self.m_is_project = has_non_mimetype_guess
-        return self.m_is_project
+        m_is_project = has_non_mimetype_guess
+        return m_is_project
+    
+    def should_display_as_project(self):
+        if self.parent != None and self.parent.is_project():
+            # Don't allow nested projects for now.
+            return False
+        
+        return self.is_project()
     
     def collapsed_guesses(self):
         if self.collapsed_type_guesses == []:
@@ -154,21 +161,29 @@ class Directory(File):
         # FIXME: O(n^3) complexity?
         for file in self.files.values():
             for other_guess in file.collapsed_guesses():
-                for name, value in other_guess.attributes.items():
-
-                    # Try collapse to existing guess
-                    done = False
-                    for my_guess in guesses:
-                        if my_guess.file_type.clazz == other_guess.file_type.clazz and my_guess.file_type.value == other_guess.file_type.value:
-                            my_guess.collapse_attribute(name, value)
-                            done = True
-                        
-                    # Create new guess
-                    if not done:
-                        new_guess = FileGuess(other_guess.file_type)
-                        new_guess.guesser = other_guess.guesser
-                        new_guess.attributes[name] = value
-                        guesses.append(new_guess)
+                done = False
+                
+                # Find matching guess
+                guess = None
+                for my_guess in guesses:
+                    if my_guess.file_type.clazz == other_guess.file_type.clazz and my_guess.file_type.value == other_guess.file_type.value:
+                        guess = my_guess
+                
+                # If guess matches, collapse attributes
+                if guess != None:
+                    for name, value in other_guess.attributes.items():
+                        print("collapse_attribute", name, value, guess)
+                        guess.collapse_attribute(name, value)
+                # Else, create a new guess
+                else:
+                    guess = FileGuess(other_guess.file_type)
+                    guess.guesser = other_guess.guesser
+                    guesses.append(guess)
+                    
+                    # Try to collapse attributes
+                    for name, value in other_guess.attributes.items():
+                        print("collapse_attribute", name, value, guess)
+                        guess.collapse_attribute(name, value)
 
         return guesses
     
@@ -178,7 +193,7 @@ class Directory(File):
             print(" •", guess.to_user_readable_string())
     
     def print_projects(self):
-        if self.is_project():
+        if self.should_display_as_project():
             self.print_as_project()
         for file in self.files.values():
             if file.is_directory():
@@ -186,3 +201,10 @@ class Directory(File):
         
     def should_traverse_into(self):
         return not self.is_special()
+    
+    def should_be_excluded(self, filename):
+        for exclude_pattern in config.args.exclude:
+            if not exclude_pattern.empty() and not exclude_pattern.startswith("/") and fnmatch.fnmatch(filename, exclude_pattern):
+                print("EXCLUDE")
+                return True
+        return False
