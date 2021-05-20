@@ -28,7 +28,7 @@ class DetectorRegistry:
                 matching_guesses += guess
                 
         if len(matching_guesses) == 0:
-            print("Couldn't guess file type: " + file.path)
+            print_verbose("Couldn't guess file type: " + file.path)
         
         return matching_guesses
 
