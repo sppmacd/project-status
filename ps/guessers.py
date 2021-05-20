@@ -163,7 +163,7 @@ class Guesser_Cpp(Guesser):
 class Guesser_Generic(Guesser):
     def guess(self, file):
         if file.extension == ".txt":
-            return [FileGuess(filetypes.mime_text_plain)]
+            return [guess_source_file(filetypes.mime_text_plain, file)]
 
 class Guesser_Git(Guesser):
     def guess(self, file):
