@@ -151,11 +151,11 @@ class Guesser_CI:
 class Guesser_Cpp(Guesser):
     def guess(self, file):
         if file.basename == "CMakeLists.txt":
-            return [FileGuess(filetypes.build_cmake)]
+            return [FileGuess(filetypes.build_cmake, file_count=1)]
         elif file.basename == "CMakeFiles":
             return [FileGuess(filetypes.build_cmake, special=True)]
         elif file.basename == "Makefile":
-            return [FileGuess(filetypes.build_gnu_make)]
+            return [FileGuess(filetypes.build_gnu_make, file_count=1)]
         elif file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
              file.extension == ".cxx" or file.extension == ".cc" or file.extension == ".hxx":
             return [guess_source_file(filetypes.mime_cpp, file)]
@@ -170,9 +170,9 @@ class Guesser_Git(Guesser):
         if file.basename == ".git":
             return [FileGuess(filetypes.version_git, special=True)]
         elif file.basename == ".gitignore":
-            return [FileGuess(filetypes.mime_gitignore)]
+            return [FileGuess(filetypes.mime_gitignore, file_count=1)]
         elif file.basename == ".gitattributes":
-            return [FileGuess(filetypes.mime_gitattributes)]
+            return [FileGuess(filetypes.mime_gitattributes, file_count=1)]
 
 class Guesser_Image(Guesser):
     def guess(self, file):
@@ -191,7 +191,7 @@ class Guesser_Inode(Guesser):
 class Guesser_Java(Guesser):
     def guess(self, file):
         if file.basename == "gradlew" or file.basename == "gradlew.bat" or file.basename == "gradle.properties" or file.basename == "build.gradle":
-            return [FileGuess(filetypes.build_gradle)]
+            return [FileGuess(filetypes.build_gradle, file_count=1)]
         elif file.extension == ".java":
             return [guess_source_file(filetypes.mime_java, file)]
 
@@ -216,7 +216,7 @@ class Guesser_Markup(Guesser):
 class Guesser_Python(Guesser):
     def guess(self, file):
         if file.basename == "__pycache__":
-            return [FileGuess(filetypes.build_python, special=True)]
+            return [FileGuess(filetypes.build_python, file_count=1, special=True)]
         elif file.extension == ".py":
             return [guess_source_file(filetypes.mime_python, file)]
 
