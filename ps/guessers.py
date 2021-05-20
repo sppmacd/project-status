@@ -45,6 +45,9 @@ class FileGuess:
     
     def lines_of_code(self):
         return self.attributes.get("lines_of_code")
+    
+    def file_count(self):
+        return self.attributes.get("file_count")
 
 def guess_source_file(filetype, file):
     
@@ -58,7 +61,7 @@ def guess_source_file(filetype, file):
         else:
             lines_of_code = 0
 
-    return FileGuess(filetype, source=True, lines_of_code=lines_of_code)
+    return FileGuess(filetype, source=True, lines_of_code=lines_of_code, file_count=1)
 
 class FileType:
     class Class:
@@ -148,9 +151,9 @@ class Guesser_Git(Guesser):
 class Guesser_Inode(Guesser):
     def guess(self, file):
         if file.is_directory():
-            return [FileGuess(filetypes.mime_directory)]
+            return [FileGuess(filetypes.mime_directory, subfile_count=len(file.files.keys()))]
         elif os.path.islink(file.path):
-            return [FileGuess(filetypes.mime_symlink)]
+            return [FileGuess(filetypes.mime_symlink, target=os.path.readlink(file.path))]
         
 class Guesser_Java(Guesser):
     def guess(self, file):
