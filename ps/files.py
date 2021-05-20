@@ -166,6 +166,7 @@ class Directory(File):
                     # Create new guess
                     if not done:
                         new_guess = FileGuess(other_guess.file_type)
+                        new_guess.guesser = other_guess.guesser
                         new_guess.attributes[name] = value
                         guesses.append(new_guess)
 

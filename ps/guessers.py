@@ -14,13 +14,14 @@ class FileGuess:
     def __init__(self, file_type=None, **attributes):
         self.file_type = file_type
         self.attributes = attributes
+        self.guesser = "unknown"
         
     def __repr__(self):
         return sgr("1", "FileGuess") + " { " + sgr("3;34", "type: ") + str(self.file_type) + "; " + sgr("3;34", "attributes: ") + str(self.attributes) + " }"
     
     def to_user_readable_string(self):
         output = ""
-        output += self.file_type.to_user_readable_string() + "\n"
+        output += self.file_type.to_user_readable_string() + sgr("32", " (" + self.guesser + ")\n")
         
         for name, value in self.attributes.items():
             output += "   - " + name + ": " + str(value) + "\n"

@@ -25,6 +25,8 @@ class DetectorRegistry:
                 continue
             guess = guesser.guess(file)
             if guess != None:
+                for one_guess in guess:
+                    one_guess.guesser = name
                 matching_guesses += guess
                 
         if len(matching_guesses) == 0:
