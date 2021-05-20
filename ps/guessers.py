@@ -132,6 +132,8 @@ class Guesser_Cpp(Guesser):
     def guess(self, file):
         if file.basename == "CMakeLists.txt":
             return [FileGuess(filetypes.build_cmake)]
+        elif file.basename == "CMakeFiles":
+            return [FileGuess(filetypes.build_cmake, special=True)]
         elif file.basename == "Makefile":
             return [FileGuess(filetypes.build_gnu_make)]
         elif file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
