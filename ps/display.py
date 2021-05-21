@@ -49,6 +49,82 @@ def generate_hsv_lookup_table(count):
 
 generate_hsv_lookup_table(9)
 
+def fancy_display(data, attribute, **kwargs):
+    
+    # Count total attribute value.
+    total_attribute_value = 0
+    for guess in data:
+        attribute_value = guess.attributes.get(attribute)
+        total_attribute_value += (attribute_value if attribute_value != None else 0)
+    
+    # Do not display anything if no data
+    if total_attribute_value == 0:
+        print(sgr("1;31", "\n (No data)\n"))
+        return
+        
+    # TODO: Detect terminal size
+    # TODO: Display other guesses as "Other" category
+    display_size = 100
+    total_line_count = 0
+    
+    # Generate display size for each guess
+    for guess in data:
+        attribute_value = guess.attributes.get(attribute)
+        attribute_value = attribute_value if attribute_value != None else 0
+        format_display_size = int(attribute_value * display_size / total_attribute_value)
+        guess.attributes["format_display_size"] = format_display_size
+
+    # Print list of guesses
+    print()
+    
+    for guess in reversed(data):
+        if guess.attributes.get(attribute) != None:
+            print(" •", guess.file_type.to_fancy_string() + " - " + sgr("1", str(guess.attributes.get(attribute))) + " " + kwargs.get("description"))
+    
+    # Print fancy chart :)
+    print()
+
+    # Labels
+    for i in range(len(data)):
+        attribute_value = data[i].attributes.get(attribute)
+        attribute_value = attribute_value if attribute_value != None else 0
+        
+        if data[i].attributes["format_display_size"] > 0:  
+            print("    ", end="")
+                    
+        for j in range(i):
+            if data[i].attributes["format_display_size"] > 0 and data[j].attributes["format_display_size"] > 0:  
+                sgr_val = "38;2;" + str(HSV(colors[j % len(colors)], 0.5, 0.8).to_rgb())
+                print(sgr(sgr_val, "│") + (math.floor(data[j].attributes["format_display_size"] - 1) * " "), end="")
+        
+        if data[i].attributes["format_display_size"] > 0:  
+            sgr_val = "38;2;" + str(HSV(colors[i % len(colors)], 0.5, 0.8).to_rgb())
+            print(sgr(sgr_val, "┌─── ") + data[i].file_type.to_fancy_string() + " - " + sgr("1", str(attribute_value * 100 // total_attribute_value)) + "%")
+                    
+    # Last lines
+    print("    ", end="")
+    for j in range(len(data)):
+        if data[j].attributes["format_display_size"] > 0:
+            sgr_val = "38;2;" + str(HSV(colors[j % len(colors)], 0.5, 0.8).to_rgb())
+            spaces = (math.floor(data[j].attributes["format_display_size"] - 1) * " ") if j != len(data) - 1 else ""
+            print(sgr(sgr_val, "│" ) + spaces, end="")
+    
+    # The chart itself
+    print("\n    ", end="")
+    
+    color = 0
+    for guess in data:
+        format_display_size = guess.attributes["format_display_size"]
+
+        range_val = math.floor(format_display_size)
+        for i in range(range_val):
+            v = ((((i / range_val) - 0.5) * 2)**2/2)/2 + 0.6
+            print(sgr("1;38;2;" + str(HSV(colors[color % len(colors)], 0.5, v).to_rgb()), "▀"), end="")
+
+        color += 1
+    print("\n")
+    
+
 def directory_fancy_display(dir):
     global colors
     
@@ -76,65 +152,16 @@ def directory_fancy_display(dir):
     cis.sort(key=compare_guesses)
     formats.sort(key=compare_source_guesses)
     
-    total_lines_of_code = 0
-    for guess in formats:
-        lines_of_code = guess.lines_of_code()
-        total_lines_of_code += (lines_of_code if lines_of_code != None else 0)
+    def print_header(text):
+        print("   -- " + sgr("1", text) + " --")
     
-    if total_lines_of_code == 0:
-        return
-        
-    # TODO: Detect terminal size
-    # TODO: Display other guesses as "Other" category
-    display_size = 100
-    total_line_count = 0
-    
-    for guess in formats:
-        lines_of_code = guess.lines_of_code()
-        lines_of_code = lines_of_code if lines_of_code != None else 0
-        format_display_size = int(lines_of_code * display_size / total_lines_of_code)
-        guess.attributes["format_display_size"] = format_display_size
-
     print()
     
-    for guess in reversed(formats):
-        if guess.lines_of_code() != None:
-            print(" •", guess.file_type.to_fancy_string() + " - " + sgr("1", str(guess.lines_of_code())) + " lines of code")
-    print()
-
-    for i in range(len(formats) + 1):
+    print_header("Build systems")
+    fancy_display(build_systems, "file_count", description="config file(s)")
     
-        if i < len(formats):
-            space_drawn = False
-            for j in range(i + 1):
-                if int(formats[j].attributes["format_display_size"]) > 0:
-                    if not space_drawn:
-                        print("    ", end="")
-                        space_drawn = True
-
-                    sgr_val = "38;2;" + str(HSV(colors[j % len(colors)], 0.5, 0.8).to_rgb())
-                    if j == i:
-                        print(sgr(sgr_val, "┌─ ") + formats[j].file_type.to_fancy_string() + " - " + sgr("1", str(formats[j].lines_of_code() * 100 // total_lines_of_code)) + "%")
-                    else:
-                        print(sgr(sgr_val, "│") + (math.floor(formats[j].attributes["format_display_size"] - 1) * " "), end="")
-                    
-        else:
-            print("    ", end="")
-            for j in range(i):
-                if int(formats[j].attributes["format_display_size"]) > 0:
-                    sgr_val = "38;2;" + str(HSV(colors[j % len(colors)], 0.5, 0.8).to_rgb())
-                    print(sgr(sgr_val, "│") + (math.floor(formats[j].attributes["format_display_size"] - 1) * " "), end="")
-            
-            print("\n    ", end="")
-            
-            color = 0
-            for guess in formats:
-                format_display_size = guess.attributes["format_display_size"]
-
-                range_val = math.floor(format_display_size)
-                for i in range(range_val):
-                    v = ((((i / range_val) - 0.5) * 2)**2/2)/2 + 0.6
-                    print(sgr("1;38;2;" + str(HSV(colors[color % len(colors)], 0.5, v).to_rgb()), "▀"), end="")
-
-                color += 1
-    print()
+    print_header("Continuous Integration")
+    fancy_display(cis, "file_count", description="config file(s)")
+    
+    print_header("Code")
+    fancy_display(formats, "lines_of_code", description="line(s) of code")
