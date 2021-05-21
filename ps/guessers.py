@@ -128,6 +128,10 @@ class filetypes:
     mime_symlink = FileType(FileType.Class.MimeType,        "inode/symlink", "Symlink")
     mime_text_plain = FileType(FileType.Class.MimeType,     "text/plain", "Plain text")
     
+    @staticmethod
+    def mime_unknown(ext):
+        return FileType(FileType.Class.MimeType, "?(" + ext + ")", "Unknown (" + ext + ")")
+    
     # Version controls
     version_git = FileType(FileType.Class.VersionControl,   "git", "Git")
                   
@@ -173,6 +177,8 @@ class Guesser_Generic(Guesser):
     def guess(self, file):
         if file.extension == ".txt":
             return [guess_source_file(filetypes.mime_text_plain, file)]
+        else:
+            return [FileGuess(filetypes.mime_unknown(file.extension), file_count=1, lines_of_code=1, unknown=True)]
 
 class Guesser_Git(Guesser):
     def guess(self, file):
