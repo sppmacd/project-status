@@ -144,6 +144,9 @@ class filetypes:
     ci_travis = FileType(FileType.Class.ContinuousIntegration,         "travis", "Travis")
 
 class Guesser:
+    def __init__(self):
+        self.name = "unknown"
+    
     def guess(self, file):
         return []
     
@@ -237,7 +240,6 @@ class Guesser_Web(Guesser):
 def register_all_guessers(registry):
     registry.register_file_type_guesser("ci",      Guesser_CI())
     registry.register_file_type_guesser("cpp",     Guesser_Cpp())
-    registry.register_file_type_guesser("generic", Guesser_Generic())
     registry.register_file_type_guesser("git",     Guesser_Git())
     registry.register_file_type_guesser("image",   Guesser_Image())
     registry.register_file_type_guesser("inode",   Guesser_Inode())
@@ -246,3 +248,6 @@ def register_all_guessers(registry):
     registry.register_file_type_guesser("markup",  Guesser_Markup())
     registry.register_file_type_guesser("python",  Guesser_Python())
     registry.register_file_type_guesser("web",     Guesser_Web())
+    
+    # Low priority
+    registry.register_file_type_guesser("generic", Guesser_Generic(), priority=100)
