@@ -93,6 +93,11 @@ def directory_fancy_display(dir):
         guess.attributes["format_display_size"] = format_display_size
     print()
     
+    for guess in formats:
+        if guess.lines_of_code() != None:
+            print(guess.file_type.to_fancy_string() + " - " + sgr("1", str(guess.lines_of_code())))
+    print()
+
     for i in range(len(formats) + 1):
     
         if i < len(formats):
