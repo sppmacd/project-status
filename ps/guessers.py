@@ -110,6 +110,7 @@ class FileType:
 class filetypes:
     
     # MIME types
+    mime_cmake = FileType(FileType.Class.MimeType,          "custom$cmake", "CMake")
     mime_cpp = FileType(FileType.Class.MimeType,            "text/x-c", "C/C++")
     mime_css = FileType(FileType.Class.MimeType,            "text/css", "CSS")
     mime_directory = FileType(FileType.Class.MimeType,      "inode/directory", "Directory")
@@ -119,6 +120,7 @@ class filetypes:
     mime_java = FileType(FileType.Class.MimeType,           "text/x-java-source", "Java")
     mime_jpg = FileType(FileType.Class.MimeType,            "image/jpg", "JPG image")
     mime_js = FileType(FileType.Class.MimeType,             "application/js", "JavaScript")
+    mime_makefile = FileType(FileType.Class.MimeType,       "custom$makefile", "Makefile")
     mime_markdown = FileType(FileType.Class.MimeType,       "custom$markdown", "Markdown")
     mime_php = FileType(FileType.Class.MimeType,            "custom$php", "PHP")
     mime_png = FileType(FileType.Class.MimeType,            "image/png", "PNG image")
@@ -154,12 +156,12 @@ class Guesser_CI:
 
 class Guesser_Cpp(Guesser):
     def guess(self, file):
-        if file.basename == "CMakeLists.txt":
-            return [FileGuess(filetypes.build_cmake, file_count=1)]
+        if file.basename == "CMakeLists.txt" or file.extension == ".cmake":
+            return [FileGuess(filetypes.build_cmake, file_count=1), guess_source_file(filetypes.mime_cmake, file)]
         elif file.basename == "CMakeFiles":
             return [FileGuess(filetypes.build_cmake, special=True)]
         elif file.basename == "Makefile":
-            return [FileGuess(filetypes.build_gnu_make, file_count=1)]
+            return [FileGuess(filetypes.build_gnu_make, file_count=1), guess_source_file(filetypes.mime_makefile, file)]
         elif file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
              file.extension == ".cxx" or file.extension == ".cc" or file.extension == ".hxx":
             return [guess_source_file(filetypes.mime_cpp, file)]
