@@ -7,6 +7,7 @@ import traceback
 
 from ps.detector import DetectorRegistry
 from ps.files import Directory, FileDescriptorManager
+import ps.display
 import ps.logging
 import config
 
@@ -27,6 +28,12 @@ def parse_args():
     # config
     sp_config = subparsers.add_parser("config", help="get/set various config options")
     sp_config.add_argument("name", help="Config option name", choices=["guessers"])
+    
+    # info
+    sp_info = subparsers.add_parser("info", help="display info in fancy way")
+    sp_info.add_argument("path", nargs="?", help="path to list projects from", default=".")
+    sp_info.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_info.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     
     # list
     sp_list = subparsers.add_parser("list", help="list projects in directory")
@@ -64,6 +71,11 @@ def main(args):
         file_list = setup_directory()
         print("Generating output")
         print(file_list)
+
+    elif args.command == "info":
+        file_list = setup_directory()
+        print("Generating output")
+        ps.display.directory_fancy_display(file_list)
 
     elif args.command == "list":
         file_list = setup_directory()

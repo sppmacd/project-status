@@ -99,9 +99,11 @@ class FileType:
         output = sgr("1;32", output)
         
         output += ": "
-        output += sgr("3;35", self.user_readable_value)
-        output += sgr("3;36", " (" + self.value + ")")
+        output += self.to_fancy_string()
         return output
+    
+    def to_fancy_string(self):
+        return sgr("3;35", self.user_readable_value) + sgr("3;36", " (" + self.value + ")")
 
 class filetypes:
     
