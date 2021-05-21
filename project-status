@@ -69,16 +69,19 @@ def main(args):
     
     if args.command == "display-tree":
         file_list = setup_directory()
+        ps.logging.print_status("", "")
         print("Generating output")
         print(file_list)
 
     elif args.command == "info":
         file_list = setup_directory()
+        ps.logging.print_status("", "")
         print("Generating output")
         ps.display.directory_fancy_display(file_list)
 
     elif args.command == "list":
         file_list = setup_directory()
+        ps.logging.print_status("", "")
         print("Generating output")
         file_list.print_projects()
 

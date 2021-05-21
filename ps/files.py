@@ -40,7 +40,8 @@ class FileDescriptorManager:
             oldpath = fd.name
             fd.close()
             del self.descriptor_queue[0]
-            del self.descriptors[oldpath]
+            if oldpath in self.descriptors:
+                del self.descriptors[oldpath]
 
         try:
             fd = open(path, mode="rb")

@@ -23,4 +23,11 @@ def print_error(text):
 def print_verbose(text):
     if config.args.verbose:
         print(sgr("1;35", "[VERBOSE]"), sgr("35", text), file=sys.stderr)
-    
+    print_status("verbose", text)
+
+def print_status(status, text):
+    text = text[0:100]
+    if len(text) != 0:
+        print("\033[G\033[2K\033[21;23;92m{}\033[m".format(text), end="") # goto column 1, print status, clear line
+    else:
+        print("\033[G\033[2K", end="") # just clear line
