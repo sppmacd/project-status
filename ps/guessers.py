@@ -60,6 +60,8 @@ def guess_source_file(filetype, file):
             try:
                 with fd as _file:
                     lines_of_code = sum(1 for _ in _file)
+            except KeyboardInterrupt:
+                raise
             except:
                 print_error(sys.exc_info())
                 lines_of_code = 0
