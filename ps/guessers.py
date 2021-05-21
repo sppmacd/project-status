@@ -178,7 +178,7 @@ class Guesser_Generic(Guesser):
         if file.extension == ".txt":
             return [guess_source_file(filetypes.mime_text_plain, file)]
         else:
-            return [FileGuess(filetypes.mime_unknown(file.extension), file_count=1, lines_of_code=1, unknown=True)]
+            return [FileGuess(filetypes.mime_unknown(file.extension), file_count=1, lines_of_code=0, unknown=True)]
 
 class Guesser_Git(Guesser):
     def guess(self, file):
