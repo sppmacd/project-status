@@ -26,6 +26,11 @@ def print_verbose(text):
     print_status("verbose", text)
 
 def print_status(status, text):
+    if not allow_ansi_escape_codes():
+        # we can't do anything with these terminals :(
+        print(text)
+        return
+    
     text = text[0:100]
     if len(text) != 0:
         print("\033[G\033[2K\033[21;23;92m{}\033[m".format(text), end="") # goto column 1, print status, clear line
