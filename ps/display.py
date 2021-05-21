@@ -132,6 +132,7 @@ def directory_fancy_display(dir):
     build_systems = []
     cis = []
     formats = []
+    version_control = []
     
     def compare_guesses(guess):
         return guess.file_type.value
@@ -147,6 +148,10 @@ def directory_fancy_display(dir):
             cis.append(guess)
         elif guess.file_type.clazz == "$mime":
             formats.append(guess)
+        elif guess.file_type.clazz == "$version":
+            version_control.append(guess)
+        else:
+            print_error("Unknown class: " + guess.file_type.clazz)
 
     build_systems.sort(key=compare_guesses)
     cis.sort(key=compare_guesses)
@@ -156,12 +161,20 @@ def directory_fancy_display(dir):
         print("   -- " + sgr("1", text) + " --")
     
     print()
+    print_header("General")
+    print()
+    print(" • Version Control: ", end="")
+    for guess in version_control:
+        print(guess.file_type.to_fancy_string(), end=", ")
+    print()
+    
+    print(" • Continuous Integration: ", end="")
+    for guess in cis:
+        print(guess.file_type.to_fancy_string(), end=", ")
+    print("\n")
     
     print_header("Build systems")
     fancy_display(build_systems, "file_count", description="config file(s)")
-    
-    print_header("Continuous Integration")
-    fancy_display(cis, "file_count", description="config file(s)")
     
     print_header("Code")
     fancy_display(formats, "lines_of_code", description="line(s) of code")
