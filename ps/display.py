@@ -144,9 +144,9 @@ def directory_fancy_display(dir):
     def compare_guesses(guess):
         return guess.file_type.value
     
-    def compare_source_guesses(guess):
-        lines_of_code = guess.lines_of_code()
-        return lines_of_code if lines_of_code != None else 0
+    def compare_guesses_by_attribute(guess, attribute):
+        attribute = guess.attributes.get(attribute)
+        return attribute if attribute != None else 0
     
     for guess in dir.collapsed_guesses():
         if guess.file_type.clazz == "$build":
@@ -162,7 +162,8 @@ def directory_fancy_display(dir):
 
     build_systems.sort(key=compare_guesses)
     cis.sort(key=compare_guesses)
-    formats.sort(key=compare_source_guesses)
+    formats_by_storage = sorted(formats, key=lambda guess : compare_guesses_by_attribute(guess, "file_size"))
+    formats.sort(key=lambda guess : compare_guesses_by_attribute(guess, "lines_of_code"))
     
     def print_header(text):
         print("   -- " + sgr("1", text) + " --")
@@ -179,6 +180,9 @@ def directory_fancy_display(dir):
     for guess in cis:
         print(guess.file_type.to_fancy_string(), end=", ")
     print("\n")
+    
+    print_header("Storage")
+    fancy_display(formats_by_storage, "file_size", description="bytes")
     
     print_header("Build systems")
     fancy_display(build_systems, "file_count", description="config file(s)")
