@@ -25,6 +25,7 @@ class DetectorRegistry:
         
     def guess_file_type(self, file):
         matching_guesses = []
+        type_classes = set()
         
         """
         If the file has multiple guesses, just one need to be in include/exclude list
@@ -42,14 +43,20 @@ class DetectorRegistry:
                 # Actual guess
                 guess = guesser.guess(file)
                 if guess != None:
+                    guess_added = []
                     for one_guess in guess:
                         one_guess.guesser = guesser.name
                         try:
                             one_guess.attributes["file_size"] = os.path.getsize(file.path)
                         except:
                             one_guess.attributes["file_size"] = 0
-                    matching_guesses += guess
-                
+                            
+                        if not one_guess.file_type.clazz in type_classes:
+                            type_classes.add(one_guess.file_type.clazz)
+                            guess_added.append(one_guess)
+                        
+                    matching_guesses += guess_added
+                    
         if len(matching_guesses) == 0:
             print_verbose("Couldn't guess file type: " + file.path)
         
