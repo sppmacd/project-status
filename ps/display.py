@@ -130,8 +130,7 @@ def fancy_display(data, attribute, **kwargs):
         v = ((((i / other_display_size) - 0.5) * 2)**2/2)/2 + 0.6
         print(sgr("1;38;2;" + str(HSV(colors[color % len(colors)], 0, v).to_rgb()), "▀"), end="")
     
-    print()
-    
+    print("\n")
 
 def directory_fancy_display(dir):
     global colors
