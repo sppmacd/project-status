@@ -95,7 +95,7 @@ def directory_fancy_display(dir):
     
     for guess in formats:
         if guess.lines_of_code() != None:
-            print(guess.file_type.to_fancy_string() + " - " + sgr("1", str(guess.lines_of_code())))
+            print(guess.file_type.to_fancy_string() + " - " + sgr("1", str(guess.lines_of_code())) + " lines of code")
     print()
 
     for i in range(len(formats) + 1):
