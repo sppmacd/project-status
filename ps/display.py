@@ -99,20 +99,21 @@ def fancy_display(data, attribute, **kwargs):
         
         if data[i].attributes["format_display_size"] > 0:  
             sgr_val = "38;2;" + str(HSV(colors[i % len(colors)], 0.5, 0.8).to_rgb())
-            print(sgr(sgr_val, "┌─── ") + data[i].file_type.to_fancy_string() + " - " + sgr("1", str(attribute_value * 100 // total_attribute_value)) + "%")
+            print(sgr(sgr_val, "╭─── ") + data[i].file_type.to_fancy_string() + " - " + sgr("1", str(attribute_value * 100 // total_attribute_value)) + "%")
                     
     # Last lines
     print("    ", end="")
     for j in range(len(data)):
         if data[j].attributes["format_display_size"] > 0:
             sgr_val = "38;2;" + str(HSV(colors[j % len(colors)], 0.5, 0.8).to_rgb())
-            spaces = (math.floor(data[j].attributes["format_display_size"] - 1) * " ") if j != len(data) - 1 else ""
-            print(sgr(sgr_val, "│" ) + spaces, end="")
+            spaces = math.floor(data[j].attributes["format_display_size"] - 1) * " "
+            print(sgr(sgr_val, "│" + spaces), end="")
     
     # The chart itself
     print("\n    ", end="")
     
     color = 0
+    total_format_display_size = 0
     for guess in data:
         format_display_size = guess.attributes["format_display_size"]
 
@@ -122,7 +123,14 @@ def fancy_display(data, attribute, **kwargs):
             print(sgr("1;38;2;" + str(HSV(colors[color % len(colors)], 0.5, v).to_rgb()), "▀"), end="")
 
         color += 1
-    print("\n")
+        total_format_display_size += format_display_size
+    
+    other_display_size = display_size - total_format_display_size
+    for i in range(other_display_size):
+        v = ((((i / other_display_size) - 0.5) * 2)**2/2)/2 + 0.6
+        print(sgr("1;38;2;" + str(HSV(colors[color % len(colors)], 0, v).to_rgb()), "▀"), end="")
+    
+    print()
     
 
 def directory_fancy_display(dir):
