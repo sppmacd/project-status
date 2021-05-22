@@ -172,15 +172,20 @@ class filetypes:
     ci_travis = FileType(FileType.Class.ContinuousIntegration,         "travis", "Travis")
 
 class Guesser:
-    def __init__(self):
+    def __init__(self, description=None):
         self.name = "unknown"
+        self.description = description
     
     def guess(self, file):
         return []
+    
+    def print_additional_info(self):
+        if self.description != None:
+            print(" - " + sgr("3;38;2;208;208;208", self.description), end="")
 
 class MagicGuesser(Guesser):
-    def __init__(self):
-        Guesser.__init__(self)
+    def __init__(self, description):
+        Guesser.__init__(self, description)
         self.subguessers = []
         
     def register_subguesser(self, magic, filetype, **attributes):
@@ -196,6 +201,13 @@ class MagicGuesser(Guesser):
             if bytes == magic:
                 return [FileGuess(filetype, file_count=1, *attributes)]
         return []
+    
+    def print_additional_info(self):
+        Guesser.print_additional_info(self)
+        
+        for subguesser in self.subguessers:
+            print()
+            print("   - " + str(subguesser[0]) + " → " + str(subguesser[1]), end="")
 
 class Guesser_Assembly(Guesser):
     def guess(self, file):
@@ -345,25 +357,25 @@ class Guesser_Web(Guesser):
 
 def register_all_guessers(registry):
     # High priority
-    magic_guesser = MagicGuesser()
+    magic_guesser = MagicGuesser("Guesser which uses file patterns to detect formats")
     magic_guesser.register_subguesser(b'\x7fELF', filetypes.mime_elf)
     registry.register_file_type_guesser("magic",    magic_guesser, priority=-100)
     
-    registry.register_file_type_guesser("asm",      Guesser_Assembly())
-    registry.register_file_type_guesser("ci",       Guesser_CI())
-    registry.register_file_type_guesser("compress", Guesser_CompressArchive())
-    registry.register_file_type_guesser("config",   Guesser_ConfigGeneric())
-    registry.register_file_type_guesser("cpp",      Guesser_Cpp())
-    registry.register_file_type_guesser("docker",   Guesser_Docker())
-    registry.register_file_type_guesser("git",      Guesser_Git())
-    registry.register_file_type_guesser("image",    Guesser_Image())
-    registry.register_file_type_guesser("inode",    Guesser_Inode())
-    registry.register_file_type_guesser("java",     Guesser_Java())
-    registry.register_file_type_guesser("js",       Guesser_JavaScript())
-    registry.register_file_type_guesser("markup",   Guesser_Markup())
-    registry.register_file_type_guesser("python",   Guesser_Python())
-    registry.register_file_type_guesser("shell",    Guesser_Shell())
-    registry.register_file_type_guesser("web",      Guesser_Web())
+    registry.register_file_type_guesser("asm",      Guesser_Assembly("Assembly sources"))
+    registry.register_file_type_guesser("ci",       Guesser_CI("Continuous integration files"))
+    registry.register_file_type_guesser("compress", Guesser_CompressArchive("Compressed and archive files"))
+    registry.register_file_type_guesser("config",   Guesser_ConfigGeneric("Generic config files"))
+    registry.register_file_type_guesser("cpp",      Guesser_Cpp("C++ and executable files"))
+    registry.register_file_type_guesser("docker",   Guesser_Docker("Docker config files"))
+    registry.register_file_type_guesser("git",      Guesser_Git("Git config files"))
+    registry.register_file_type_guesser("image",    Guesser_Image("Image (picture) files"))
+    registry.register_file_type_guesser("inode",    Guesser_Inode("Directories etc."))
+    registry.register_file_type_guesser("java",     Guesser_Java("Java sources"))
+    registry.register_file_type_guesser("js",       Guesser_JavaScript("JS sources"))
+    registry.register_file_type_guesser("markup",   Guesser_Markup("Markup/formatting languages"))
+    registry.register_file_type_guesser("python",   Guesser_Python("Python sources"))
+    registry.register_file_type_guesser("shell",    Guesser_Shell("Shell scripts"))
+    registry.register_file_type_guesser("web",      Guesser_Web("Web-related formats"))
     
     # Low priority
-    registry.register_file_type_guesser("generic", Guesser_Generic(), priority=100)
+    registry.register_file_type_guesser("generic", Guesser_Generic("Plaintext and unknown files"), priority=100)
