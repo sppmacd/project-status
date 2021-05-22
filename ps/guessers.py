@@ -119,6 +119,7 @@ class filetypes:
     mime_directory = FileType(FileType.Class.MimeType,       "inode/directory", "Directory")
     mime_docker = FileType(FileType.Class.MimeType,          "custom$docker", "Dockerfile")
     mime_dynamic_library = FileType(FileType.Class.MimeType, "custom$dynamic_library", "Dynamic library")
+    mime_elf = FileType(FileType.Class.MimeType,             "custom$elf", "ELF binary")
     mime_gif = FileType(FileType.Class.MimeType,             "image/gif", "GIF image")
     mime_gitignore = FileType(FileType.Class.MimeType,       "custom$git/ignore", ".gitignore")
     mime_gitattributes = FileType(FileType.Class.MimeType,   "custom$git/attributes", ".gitattributes")
@@ -173,6 +174,25 @@ class Guesser:
         self.name = "unknown"
     
     def guess(self, file):
+        return []
+
+class MagicGuesser(Guesser):
+    def __init__(self):
+        Guesser.__init__(self)
+        self.subguessers = []
+        
+    def register_subguesser(self, magic, filetype, **attributes):
+        self.subguessers.append((magic, filetype, attributes))
+        
+    def guess(self, file):
+        fd = file.descriptor()
+        if fd == None:
+            return []
+        for magic, filetype, attributes in self.subguessers:
+            fd.seek(0)
+            bytes = fd.read(len(magic))
+            if bytes == magic:
+                return [FileGuess(filetype, file_count=1, *attributes)]
         return []
 
 class Guesser_Assembly(Guesser):
@@ -318,6 +338,11 @@ class Guesser_Web(Guesser):
         
 
 def register_all_guessers(registry):
+    # High priority
+    magic_guesser = MagicGuesser()
+    magic_guesser.register_subguesser(b'\x7fELF', filetypes.mime_elf)
+    registry.register_file_type_guesser("magic",    magic_guesser, priority=-100)
+    
     registry.register_file_type_guesser("asm",      Guesser_Assembly())
     registry.register_file_type_guesser("ci",       Guesser_CI())
     registry.register_file_type_guesser("compress", Guesser_CompressArchive())
