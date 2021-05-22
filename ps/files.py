@@ -88,6 +88,19 @@ class File:
             return None
         else:
             return FileDescriptorManager.instance.get_by_path(self.path)
+        
+    def print_fancy(self):
+        print(self.path, end=" ")
+        for guess in self.guesses():
+            print(guess.file_type, end="; ")
+        print()
+
+    def print_if_has_guesses(self, guesses):
+        for requested_guess in guesses:
+            for my_guess in self.guesses():
+                if requested_guess == my_guess.file_type.value:
+                    self.print_fancy()
+                    break
 
 class Directory(File):
     def __init__(self, parent, path):
@@ -214,3 +227,13 @@ class Directory(File):
                         return False
             return non_guesser_count > 0
         return False
+    
+    def print_if_has_guesses(self, guesses):
+        File.print_if_has_guesses(self, guesses)
+        
+        for file in self.files.values():
+            file.print_if_has_guesses(guesses)
+                
+        
+                
+        

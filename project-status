@@ -41,6 +41,13 @@ def parse_args():
     sp_list.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     sp_list.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     
+    # list-files
+    sp_list_files = subparsers.add_parser("list-files", help="list files in project")
+    sp_list_files.add_argument("path", nargs="?", help="path to list projects from", default=".")
+    sp_list_files.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/'), comma-separated")
+    sp_list_files.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/'), comma-separated")
+    sp_list_files.add_argument("--guesses", "-g", help="specify guess types to list, comma separated", required=True)
+    
     # version
     sp_version = subparsers.add_parser("version", help="display version")
 
@@ -87,6 +94,12 @@ def main(args):
         ps.logging.print_status("", "")
         print("Generating output")
         file_list.print_projects()
+
+    elif args.command == "list-files":
+        file_list = setup_directory()
+        ps.logging.print_status("", "")
+        print("Generating output")
+        file_list.print_if_has_guesses(config.args.guesses.split(","))
 
 try:
     if __name__ == "__main__":
