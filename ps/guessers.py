@@ -131,6 +131,7 @@ class filetypes:
     mime_jpg = FileType(FileType.Class.MimeType,             "image/jpg", "JPG image")
     mime_js = FileType(FileType.Class.MimeType,              "application/js", "JavaScript")
     mime_json = FileType(FileType.Class.MimeType,            "application/json", "JSON")
+    mime_ld_script = FileType(FileType.Class.MimeType,       "custom$ld", "Linker script")
     mime_makefile = FileType(FileType.Class.MimeType,        "custom$makefile", "Makefile")
     mime_markdown = FileType(FileType.Class.MimeType,        "custom$markdown", "Markdown")
     mime_ninja = FileType(FileType.Class.MimeType,           "custom$ninja", "Ninja config")
@@ -145,6 +146,7 @@ class filetypes:
     mime_symlink = FileType(FileType.Class.MimeType,         "inode/symlink", "Symlink")
     mime_tar = FileType(FileType.Class.MimeType,             "application/x-tar", "Tar archive")
     mime_text_plain = FileType(FileType.Class.MimeType,      "text/plain", "Plain text")
+    mime_wasm = FileType(FileType.Class.MimeType,            "custom$wasm", "WebAssembly")
     mime_yaml = FileType(FileType.Class.MimeType,            "custom$yaml", "YML")
     mime_zip = FileType(FileType.Class.MimeType,             "application/x-zip-compressed", "ZIP archive")
     
@@ -240,9 +242,11 @@ class Guesser_Cpp(Guesser):
             return [guess_source_file(filetypes.mime_cpp, file)]
         elif file.extension == ".o":
             return [FileGuess(filetypes.mime_object, file_count=1)]
+        elif file.extension == ".ld":
+            return [guess_source_file(filetypes.mime_ld_script, file)]
         elif file.extension == ".a":
             return [FileGuess(filetypes.mime_static_library, file_count=1)]
-        elif file.extension == ".so" or file.extension == ".dll": #FIXME: Move it to magic guesser when it will be done
+        elif file.extension == ".dll":
             return [FileGuess(filetypes.mime_dynamic_library, file_count=1)]
 
 class Guesser_Docker(Guesser):
@@ -335,6 +339,8 @@ class Guesser_Web(Guesser):
             return [guess_source_file(filetypes.mime_php, file)]
         elif file.extension == ".css":
             return [guess_source_file(filetypes.mime_css, file)]
+        elif file.extension == ".wasm":
+            return [guess_source_file(filetypes.mime_wasm, file)]
         
 
 def register_all_guessers(registry):
