@@ -82,6 +82,22 @@ class FileType:
         self.value = value
         self.user_readable_value = user_readable_value if user_readable_value != None else value
     
+    @staticmethod
+    def mime(value, description):
+        return FileType(FileType.Class.MimeType, value, description)
+    
+    @staticmethod
+    def version_control(value, description):
+        return FileType(FileType.Class.VersionControl, value, description)
+    
+    @staticmethod
+    def build_system(value, description):
+        return FileType(FileType.Class.BuildSystem, value, description)
+    
+    @staticmethod
+    def continuous_integration(value, description):
+        return FileType(FileType.Class.ContinuousIntegration, value, description)
+    
     def __repr__(self):
         return sgr("1;33", self.clazz) + " (" + sgr("3;32", self.value) + ")"
     
@@ -108,68 +124,68 @@ class FileType:
         return sgr("3;35", self.user_readable_value) + sgr("3;36", " (" + self.value + ")")
 
 class filetypes:
-    
+
     # MIME types
-    mime_asm = FileType(FileType.Class.MimeType,             "text/x-asm", "Assembly")
-    mime_bmp = FileType(FileType.Class.MimeType,             "image/bmp", "BMP image")
-    mime_cmake = FileType(FileType.Class.MimeType,           "custom$cmake", "CMake")
-    mime_config = FileType(FileType.Class.MimeType,          "custom$config", "Config")
-    mime_cpp = FileType(FileType.Class.MimeType,             "text/x-c", "C/C++")
-    mime_css = FileType(FileType.Class.MimeType,             "text/css", "CSS")
-    mime_directory = FileType(FileType.Class.MimeType,       "inode/directory", "Directory")
-    mime_docker = FileType(FileType.Class.MimeType,          "custom$docker", "Dockerfile")
-    mime_dynamic_library = FileType(FileType.Class.MimeType, "custom$dynamic_library", "Dynamic library")
-    mime_elf = FileType(FileType.Class.MimeType,             "custom$elf", "ELF binary")
-    mime_gif = FileType(FileType.Class.MimeType,             "image/gif", "GIF image")
-    mime_gitignore = FileType(FileType.Class.MimeType,       "custom$git/ignore", ".gitignore")
-    mime_gitattributes = FileType(FileType.Class.MimeType,   "custom$git/attributes", ".gitattributes")
-    mime_gz = FileType(FileType.Class.MimeType,              "application/x-compressed$gz", "Gzip-compressed file")
-    mime_html = FileType(FileType.Class.MimeType,            "text/html", "HTML")
-    mime_ico = FileType(FileType.Class.MimeType,             "image/x-icon", "Icon (ICO)")
-    mime_ini = FileType(FileType.Class.MimeType,             "custom$ini", "INI config")
-    mime_java = FileType(FileType.Class.MimeType,            "text/x-java-source", "Java")
-    mime_jpg = FileType(FileType.Class.MimeType,             "image/jpg", "JPG image")
-    mime_js = FileType(FileType.Class.MimeType,              "application/js", "JavaScript")
-    mime_json = FileType(FileType.Class.MimeType,            "application/json", "JSON")
-    mime_ld_script = FileType(FileType.Class.MimeType,       "custom$ld", "Linker script")
-    mime_makefile = FileType(FileType.Class.MimeType,        "custom$makefile", "Makefile")
-    mime_markdown = FileType(FileType.Class.MimeType,        "custom$markdown", "Markdown")
-    mime_ninja = FileType(FileType.Class.MimeType,           "custom$ninja", "Ninja config")
-    mime_object = FileType(FileType.Class.MimeType,          "custom$object", "Object")
-    mime_patch = FileType(FileType.Class.MimeType,           "custom$patch", "Patch/diff")
-    mime_php = FileType(FileType.Class.MimeType,             "custom$php", "PHP")
-    mime_png = FileType(FileType.Class.MimeType,             "image/png", "PNG image")
-    mime_python = FileType(FileType.Class.MimeType,          "application/x-python", "Python")
-    mime_shell = FileType(FileType.Class.MimeType,           "application/x-sh", "Shell")
-    mime_static_library = FileType(FileType.Class.MimeType,  "custom$static_library", "Static library")
-    mime_svg = FileType(FileType.Class.MimeType,             "custom$svg", "SVG image")
-    mime_symlink = FileType(FileType.Class.MimeType,         "inode/symlink", "Symlink")
-    mime_tar = FileType(FileType.Class.MimeType,             "application/x-tar", "Tar archive")
-    mime_text_plain = FileType(FileType.Class.MimeType,      "text/plain", "Plain text")
-    mime_wasm = FileType(FileType.Class.MimeType,            "custom$wasm", "WebAssembly")
-    mime_yaml = FileType(FileType.Class.MimeType,            "custom$yaml", "YML")
-    mime_zip = FileType(FileType.Class.MimeType,             "application/x-zip-compressed", "ZIP archive")
+    mime_asm =              FileType.mime("text/x-asm", "Assembly")
+    mime_bmp =              FileType.mime("image/bmp", "BMP image")
+    mime_cmake =            FileType.mime("custom$cmake", "CMake")
+    mime_config =           FileType.mime("custom$config", "Config")
+    mime_cpp =              FileType.mime("text/x-c", "C/C++")
+    mime_css =              FileType.mime("text/css", "CSS")
+    mime_directory =        FileType.mime("inode/directory", "Directory")
+    mime_docker =           FileType.mime("custom$docker", "Dockerfile")
+    mime_dynamic_library =  FileType.mime("custom$dynamic_library", "Dynamic library")
+    mime_elf =              FileType.mime("custom$elf", "ELF binary")
+    mime_gif =              FileType.mime("image/gif", "GIF image")
+    mime_gitignore =        FileType.mime("custom$git/ignore", ".gitignore")
+    mime_gitattributes =    FileType.mime("custom$git/attributes", ".gitattributes")
+    mime_gz =               FileType.mime("application/x-compressed$gz", "Gzip-compressed file")
+    mime_html =             FileType.mime("text/html", "HTML")
+    mime_ico =              FileType.mime("image/x-icon", "Icon (ICO)")
+    mime_ini =              FileType.mime("custom$ini", "INI config")
+    mime_java =             FileType.mime("text/x-java-source", "Java")
+    mime_jpg =              FileType.mime("image/jpg", "JPG image")
+    mime_js =               FileType.mime("application/js", "JavaScript")
+    mime_json =             FileType.mime("application/json", "JSON")
+    mime_ld_script =        FileType.mime("custom$ld", "Linker script")
+    mime_makefile =         FileType.mime("custom$makefile", "Makefile")
+    mime_markdown =         FileType.mime("custom$markdown", "Markdown")
+    mime_ninja =            FileType.mime("custom$ninja", "Ninja config")
+    mime_object =           FileType.mime("custom$object", "Object")
+    mime_patch =            FileType.mime("custom$patch", "Patch/diff")
+    mime_php =              FileType.mime("custom$php", "PHP")
+    mime_png =              FileType.mime("image/png", "PNG image")
+    mime_python =           FileType.mime("application/x-python", "Python")
+    mime_shell =            FileType.mime("application/x-sh", "Shell")
+    mime_static_library =   FileType.mime("custom$static_library", "Static library")
+    mime_svg =              FileType.mime("custom$svg", "SVG image")
+    mime_symlink =          FileType.mime("inode/symlink", "Symlink")
+    mime_tar =              FileType.mime("application/x-tar", "Tar archive")
+    mime_text_plain =       FileType.mime("text/plain", "Plain text")
+    mime_wasm =             FileType.mime("custom$wasm", "WebAssembly")
+    mime_yaml =             FileType.mime("custom$yaml", "YML")
+    mime_zip =              FileType.mime("application/x-zip-compressed", "ZIP archive")
     
     @staticmethod
     def mime_unknown(ext):
-        return FileType(FileType.Class.MimeType, "?(" + ext + ")", "Unknown (" + ext + ")")
+        return FileType.mime("?(" + ext + ")", "Unknown (" + ext + ")")
     
     # Version controls
-    version_git = FileType(FileType.Class.VersionControl,   "git", "Git")
+    version_git = FileType.version_control("git", "Git")
                   
     # Build systems
-    build_cmake =  FileType(FileType.Class.BuildSystem,     "cmake", "CMake")
-    build_docker =  FileType(FileType.Class.BuildSystem,    "docker", "Docker")
-    build_gnu_make = FileType(FileType.Class.BuildSystem,   "gnu_make", "GNU Make")
-    build_gradle = FileType(FileType.Class.BuildSystem,     "gradle", "Gradle")
-    build_gulp = FileType(FileType.Class.BuildSystem,       "gulp", "Gulp")
-    build_ninja = FileType(FileType.Class.BuildSystem,      "ninja", "Ninja")
-    build_node_js = FileType(FileType.Class.BuildSystem,    "node_js", "Node.js")
-    build_python =  FileType(FileType.Class.BuildSystem,    "python", "Python (__pycache__)")
+    build_cmake =  FileType.build_system("cmake", "CMake")
+    build_docker =  FileType.build_system("docker", "Docker")
+    build_gnu_make = FileType.build_system("gnu_make", "GNU Make")
+    build_gradle = FileType.build_system("gradle", "Gradle")
+    build_gulp = FileType.build_system("gulp", "Gulp")
+    build_ninja = FileType.build_system("ninja", "Ninja")
+    build_node_js = FileType.build_system("node_js", "Node.js")
+    build_python =  FileType.build_system("python", "Python (__pycache__)")
     
     # CI
-    ci_github_actions = FileType(FileType.Class.ContinuousIntegration, "github_actions", "GitHub Actions")
-    ci_travis = FileType(FileType.Class.ContinuousIntegration,         "travis", "Travis")
+    ci_github_actions = FileType.continuous_integration("github_actions", "GitHub Actions")
+    ci_travis = FileType.continuous_integration("travis", "Travis")
 
 class Guesser:
     def __init__(self, description=None):
