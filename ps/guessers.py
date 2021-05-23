@@ -162,6 +162,7 @@ class filetypes:
     mime_symlink =          FileType.mime("inode/symlink", "Symlink")
     mime_tar =              FileType.mime("application/x-tar", "Tar archive")
     mime_text_plain =       FileType.mime("text/plain", "Plain text")
+    mime_ttf =              FileType.mime("font/ttf", "TTF font")
     mime_wasm =             FileType.mime("custom$wasm", "WebAssembly")
     mime_yaml =             FileType.mime("custom$yaml", "YML")
     mime_zip =              FileType.mime("application/x-zip-compressed", "ZIP archive")
@@ -281,6 +282,11 @@ class Guesser_Docker(Guesser):
     def guess(self, file):
         if file.basename == "Dockerfile" or file.extension == ".dockerfile":
             return [guess_source_file(filetypes.mime_docker, file)]
+
+class Guesser_Font(Guesser):
+    def guess(self, file):
+        if file.extension == ".ttf":
+            return [FileGuess(filetypes.mime_ttf, file)]
 
 class Guesser_Generic(Guesser):
     def guess(self, file):
