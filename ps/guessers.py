@@ -133,6 +133,7 @@ class filetypes:
     mime_cpp =              FileType.mime("text/x-c", "C/C++")
     mime_css =              FileType.mime("text/css", "CSS")
     mime_directory =        FileType.mime("inode/directory", "Directory")
+    mime_doc =              FileType.mime("application/msword", "MS Word document")
     mime_docker =           FileType.mime("custom$docker", "Dockerfile")
     mime_dynamic_library =  FileType.mime("custom$dynamic_library", "Dynamic library")
     mime_elf =              FileType.mime("custom$elf", "ELF binary")
@@ -152,7 +153,10 @@ class filetypes:
     mime_markdown =         FileType.mime("custom$markdown", "Markdown")
     mime_ninja =            FileType.mime("custom$ninja", "Ninja config")
     mime_object =           FileType.mime("custom$object", "Object")
+    mime_ods =              FileType.mime("custom$ods", "OpenOffice Spreadsheet document")
+    mime_odt =              FileType.mime("custom$odt", "OpenOffice Writer document")
     mime_patch =            FileType.mime("custom$patch", "Patch/diff")
+    mime_pdf =              FileType.mime("application/pdf", "PDF document")
     mime_php =              FileType.mime("custom$php", "PHP")
     mime_png =              FileType.mime("image/png", "PNG image")
     mime_python =           FileType.mime("application/x-python", "Python")
@@ -164,6 +168,7 @@ class filetypes:
     mime_text_plain =       FileType.mime("text/plain", "Plain text")
     mime_ttf =              FileType.mime("font/ttf", "TTF font")
     mime_wasm =             FileType.mime("custom$wasm", "WebAssembly")
+    mime_xls =              FileType.mime("application/excel", "MS Excel document")
     mime_yaml =             FileType.mime("custom$yaml", "YML")
     mime_zip =              FileType.mime("application/x-zip-compressed", "ZIP archive")
     
@@ -283,10 +288,25 @@ class Guesser_Docker(Guesser):
         if file.basename == "Dockerfile" or file.extension == ".dockerfile":
             return [guess_source_file(filetypes.mime_docker, file)]
 
+class Guesser_Document(Guesser):
+    def guess(self, file):
+        if file.extension == ".doc" or file.extension == ".docx":
+            return [FileGuess(filetypes.mime_doc)]
+        elif file.extension == ".xls" or file.extension == ".xlsx":
+            return [FileGuess(filetypes.mime_xls)]
+
+        elif file.extension == ".odt":
+            return [FileGuess(filetypes.mime_odt)]
+        elif file.extension == ".ods":
+            return [FileGuess(filetypes.mime_ods)]
+        
+        elif file.extension == ".pdf":
+            return [FileGuess(filetypes.mime_pdf)]
+
 class Guesser_Font(Guesser):
     def guess(self, file):
         if file.extension == ".ttf":
-            return [FileGuess(filetypes.mime_ttf, file)]
+            return [FileGuess(filetypes.mime_ttf)]
 
 class Guesser_Generic(Guesser):
     def guess(self, file):
@@ -389,6 +409,8 @@ def register_all_guessers(registry):
     registry.register_file_type_guesser("config",   Guesser_ConfigGeneric("Generic config files"))
     registry.register_file_type_guesser("cpp",      Guesser_Cpp("C++ and executable files"))
     registry.register_file_type_guesser("docker",   Guesser_Docker("Docker config files"))
+    registry.register_file_type_guesser("document", Guesser_Document("Various document files"))
+    registry.register_file_type_guesser("font",     Guesser_Font("Font files"))
     registry.register_file_type_guesser("git",      Guesser_Git("Git config files"))
     registry.register_file_type_guesser("image",    Guesser_Image("Image (picture) files"))
     registry.register_file_type_guesser("inode",    Guesser_Inode("Directories etc."))
