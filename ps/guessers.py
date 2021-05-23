@@ -68,7 +68,7 @@ def guess_source_file(filetype, file):
         else:
             lines_of_code = 0
 
-    return FileGuess(filetype, source=True, lines_of_code=lines_of_code, file_count=1)
+    return FileGuess(filetype, source=True, lines_of_code=lines_of_code)
 
 class FileType:
     class Class:
@@ -215,7 +215,7 @@ class MagicGuesser(Guesser):
             fd.seek(0)
             bytes = fd.read(len(magic))
             if bytes == magic:
-                return [FileGuess(filetype, file_count=1, *attributes)]
+                return [FileGuess(filetype, *attributes)]
         return []
     
     def print_additional_info(self):
@@ -249,33 +249,33 @@ class Guesser_ConfigGeneric(Guesser):
 class Guesser_CompressArchive(Guesser):
     def guess(self, file):
         if file.extension == ".gz":
-            return [FileGuess(filetypes.mime_gz, file_count=1)]
+            return [FileGuess(filetypes.mime_gz)]
         elif file.extension == ".tar":
-            return [FileGuess(filetypes.mime_tar, file_count=1)]
+            return [FileGuess(filetypes.mime_tar)]
         elif file.extension == ".zip":
-            return [FileGuess(filetypes.mime_zip, file_count=1)]
+            return [FileGuess(filetypes.mime_zip)]
 
 class Guesser_Cpp(Guesser):
     def guess(self, file):
         if file.basename == "CMakeLists.txt" or file.extension == ".cmake":
-            return [FileGuess(filetypes.build_cmake, file_count=1), guess_source_file(filetypes.mime_cmake, file)]
+            return [FileGuess(filetypes.build_cmake), guess_source_file(filetypes.mime_cmake, file)]
         elif file.basename == "CMakeFiles":
             return [FileGuess(filetypes.build_cmake, special=True)]
         elif re.search("Makefile.*", file.basename):
-            return [FileGuess(filetypes.build_gnu_make, file_count=1), guess_source_file(filetypes.mime_makefile, file)]
+            return [FileGuess(filetypes.build_gnu_make), guess_source_file(filetypes.mime_makefile, file)]
         elif file.extension == ".ninja":
-            return [FileGuess(filetypes.build_ninja, file_count=1), guess_source_file(filetypes.mime_ninja, file)]
+            return [FileGuess(filetypes.build_ninja), guess_source_file(filetypes.mime_ninja, file)]
         elif file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
              file.extension == ".cxx" or file.extension == ".cc" or file.extension == ".hxx":
             return [guess_source_file(filetypes.mime_cpp, file)]
         elif file.extension == ".o":
-            return [FileGuess(filetypes.mime_object, file_count=1)]
+            return [FileGuess(filetypes.mime_object)]
         elif file.extension == ".ld":
             return [guess_source_file(filetypes.mime_ld_script, file)]
         elif file.extension == ".a":
-            return [FileGuess(filetypes.mime_static_library, file_count=1)]
+            return [FileGuess(filetypes.mime_static_library)]
         elif file.extension == ".dll":
-            return [FileGuess(filetypes.mime_dynamic_library, file_count=1)]
+            return [FileGuess(filetypes.mime_dynamic_library)]
 
 class Guesser_Docker(Guesser):
     def guess(self, file):
@@ -287,7 +287,7 @@ class Guesser_Generic(Guesser):
         if file.extension == ".txt":
             return [guess_source_file(filetypes.mime_text_plain, file)]
         else:
-            return [FileGuess(filetypes.mime_unknown(file.extension), file_count=1, unknown=True)]
+            return [FileGuess(filetypes.mime_unknown(file.extension), unknown=True)]
 
 class Guesser_Git(Guesser):
     def guess(self, file):
@@ -325,7 +325,7 @@ class Guesser_Inode(Guesser):
 class Guesser_Java(Guesser):
     def guess(self, file):
         if file.basename == "gradlew" or file.basename == "gradlew.bat" or file.basename == "gradle.properties" or file.basename == "build.gradle":
-            return [FileGuess(filetypes.build_gradle, file_count=1)]
+            return [FileGuess(filetypes.build_gradle)]
         elif file.extension == ".java":
             return [guess_source_file(filetypes.mime_java, file)]
 
@@ -352,7 +352,7 @@ class Guesser_Markup(Guesser):
 class Guesser_Python(Guesser):
     def guess(self, file):
         if file.basename == "__pycache__":
-            return [FileGuess(filetypes.build_python, file_count=1, special=True)]
+            return [FileGuess(filetypes.build_python, special=True)]
         elif file.extension == ".py":
             return [guess_source_file(filetypes.mime_python, file)]
 
