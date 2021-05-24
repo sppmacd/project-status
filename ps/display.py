@@ -171,15 +171,35 @@ def directory_fancy_display(dir):
     print()
     print_header("General")
     print()
-    print(" • Version Control: ", end="")
-    for guess in version_control:
-        print(guess.file_type.to_fancy_string(), end=", ")
-    print()
     
     print(" • Continuous Integration: ", end="")
     for guess in cis:
         print(guess.file_type.to_fancy_string(), end=", ")
     print("\n")
+    
+    print_header("Version Control")
+    print()
+    
+    def fancy_display_refs(data):
+        output = set()
+        for ref in data:
+            last_slash = ref.rfind('/')
+            branch_name = ref[last_slash+1:]
+            if branch_name != "":
+                output.add(branch_name)
+        return ",".join(output)
+    
+    def fancy_display_commit(data):
+        author = data["author"]
+        return "{} by {} <{}> at {}\n\n{}".format(sgr("4", data["hash"]), sgr("1", author["full_name"]), author["email"], data["date"], data["message"])
+    
+    for guess in version_control:
+        print(" • " + guess.file_type.to_fancy_string())
+        print()
+        print("   - " + sgr("34", "Commits: ") + str(guess.attributes["commit_count"]))
+        print("   - " + sgr("34", "Branches: ") + fancy_display_refs(guess.attributes["refs"]))
+        head = guess.attributes["head"]
+        print("   - " + sgr("34", "Last commit: ") + fancy_display_commit(head))
     
     print_header("Storage")
     fancy_display(formats_by_storage, "file_size", description="bytes")

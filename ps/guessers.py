@@ -4,11 +4,12 @@ import stat
 import sys
 import traceback
 
-import config as config
-
 from enum import Enum
+from io import StringIO
 
+import config as config
 from .logging import *
+from .util import run_process_in_dir_and_return_stdout
 
 class FileGuess:
     def __init__(self, file_type=None, **attributes):
@@ -316,9 +317,38 @@ class Guesser_Generic(Guesser):
             return [FileGuess(filetypes.mime_unknown(file.extension), unknown=True)]
 
 class Guesser_Git(Guesser):
+    def parse_git_log_output(self, output):
+        stringio = StringIO(output)
+        
+        hash = re.search("commit ([a-f0-9]{40})", stringio.readline()).group(1)
+        author_regex = re.search("Author: (.*) <(.*)>", stringio.readline())
+        author = {"full_name": author_regex.group(1), "email": author_regex.group(2)}
+        date = re.search("Date:   (.*)", stringio.readline()).group(1)
+        stringio.readline() # Skip empty line
+        message = stringio.readline()
+        stringio.readline() # Skip empty line
+        description = ""
+        
+        while True:
+            next_line = stringio.readline()
+            if next_line == "":
+                break
+            description += next_line
+        
+        return {"hash":hash, "author":author, "date":date, "message":message, "description":description}
+    
+    def git_guess(self, file):
+        guess = FileGuess(filetypes.version_git, special=True)
+        
+        guess.attributes["commit_count"] = int(run_process_in_dir_and_return_stdout(file.path, "git rev-list --all --count"))
+        guess.attributes["refs"] = run_process_in_dir_and_return_stdout(file.path, "git for-each-ref --format=%(refname)").split('\n')
+        guess.attributes["head"] = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log HEAD^..HEAD"))
+            
+        return [guess]
+    
     def guess(self, file):
         if file.basename == ".git":
-            return [FileGuess(filetypes.version_git, special=True)]
+            return self.git_guess(file)
         elif file.basename == ".gitignore":
             return [guess_source_file(filetypes.mime_gitignore, file)]
         elif file.basename == ".gitattributes":
