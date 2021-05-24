@@ -103,14 +103,14 @@ class File:
                     break
 
 class Directory(File):
-    def __init__(self, parent, path):
+    def __init__(self, parent, path, **kwargs):
         print_verbose(path)
         File.__init__(self, parent, path)
         self.files = {}
         self.m_is_project = None
         self.collapsed_type_guesses = []
         
-        if not self.should_traverse_into():
+        if not self.should_traverse_into() or kwargs.get("traverse") == False:
             print_verbose("Special path: " + path)
             return
         
