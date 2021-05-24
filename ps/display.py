@@ -189,17 +189,13 @@ def directory_fancy_display(dir):
                 output.add(branch_name)
         return ",".join(output)
     
-    def fancy_display_commit(data):
-        author = data["author"]
-        return "{} by {} <{}> at {}\n\n{}".format(sgr("4", data["hash"]), sgr("1", author["full_name"]), author["email"], data["date"], data["message"])
-    
     for guess in version_control:
         print(" • " + guess.file_type.to_fancy_string())
         print()
         print("   - " + sgr("34", "Commits: ") + str(guess.attributes["commit_count"]))
         print("   - " + sgr("34", "Branches: ") + fancy_display_refs(guess.attributes["refs"]))
         head = guess.attributes["head"]
-        print("   - " + sgr("34", "Last commit: ") + fancy_display_commit(head))
+        print("   - " + sgr("34", "Last commit: ") + guess.guesser.fancy_display_commit(head))
     
     print_header("Storage")
     fancy_display(formats_by_storage, "file_size", description="bytes")

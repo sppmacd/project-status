@@ -316,35 +316,70 @@ class Guesser_Generic(Guesser):
         else:
             return [FileGuess(filetypes.mime_unknown(file.extension), unknown=True)]
 
-class Guesser_Git(Guesser):
+class VersionControlGuesser(Guesser):
+    def print_log(self, file):
+        print_error("Invalid VersionControlGuesser")
+        return None
+    
+    def fancy_display_commit(self, data):
+        author = data["author"]
+        return "{} by {} {} at {}\n\n{}\n{}".format(sgr("4;34", data["hash"]), sgr("1;33", author["full_name"]), sgr("33", "<" + author["email"] + ">"), sgr("35",data["date"]), data["message"], sgr("90;3", data["description"]))
+
+class Guesser_Git(VersionControlGuesser):
     def parse_git_log_output(self, output):
         stringio = StringIO(output)
         
-        hash = re.search("commit ([a-f0-9]{40})", stringio.readline()).group(1)
-        author_regex = re.search("Author: (.*) <(.*)>", stringio.readline())
-        author = {"full_name": author_regex.group(1), "email": author_regex.group(2)}
-        date = re.search("Date:   (.*)", stringio.readline()).group(1)
-        stringio.readline() # Skip empty line
-        message = stringio.readline()
-        stringio.readline() # Skip empty line
-        description = ""
+        data = []
         
         while True:
-            next_line = stringio.readline()
-            if next_line == "":
+            # If the first match fails, probably we reached EOF :)
+            try:
+                hash = re.search("commit ([a-f0-9]{40})", stringio.readline()).group(1)
+            except:
                 break
-            description += next_line
-        
-        return {"hash":hash, "author":author, "date":date, "message":message, "description":description}
+                
+            author_regex = re.search("Author: (.*) <(.*)>", stringio.readline())
+            author = {"full_name": author_regex.group(1), "email": author_regex.group(2)}
+            date = re.search("Date:   (.*)", stringio.readline()).group(1)
+            stringio.readline() # Skip empty line
+            message = stringio.readline()
+            stringio.readline() # Skip empty line
+            description = ""
+            seek = stringio.tell()
+            
+            next_line = stringio.readline()
+                
+            # Oops, we went too far! (Commit message lines starts with 4 spaces)
+            if not next_line.startswith("    "):
+                print(sgr("41", next_line))
+                stringio.seek(seek)
+            else:
+                stringio.seek(seek)
+                while True:
+                    next_line = stringio.readline()
+
+                    if not next_line.startswith("    "):
+                        break
+
+                    description += next_line
+            
+            data.append({"hash":hash, "author":author, "date":date, "message":message, "description":description})
+        return data
     
     def git_guess(self, file):
         guess = FileGuess(filetypes.version_git, special=True)
         
         guess.attributes["commit_count"] = int(run_process_in_dir_and_return_stdout(file.path, "git rev-list --all --count"))
         guess.attributes["refs"] = run_process_in_dir_and_return_stdout(file.path, "git for-each-ref --format=%(refname)").split('\n')
-        guess.attributes["head"] = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log HEAD^..HEAD"))
+        guess.attributes["head"] = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log HEAD^..HEAD"))[0]
             
         return [guess]
+    
+    def print_log(self, file):
+        log = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log --reverse"))
+        print(log)
+        for commit in log:
+            print(self.fancy_display_commit(commit))
     
     def guess(self, file):
         if file.basename == ".git":

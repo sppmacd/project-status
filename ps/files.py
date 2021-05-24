@@ -110,7 +110,9 @@ class Directory(File):
         self.m_is_project = None
         self.collapsed_type_guesses = []
         
-        if not self.should_traverse_into() or kwargs.get("traverse") == False:
+        max_depth = kwargs.get("max_depth")
+        
+        if not self.should_traverse_into() or max_depth == 0:
             print_verbose("Special path: " + path)
             return
         
@@ -121,7 +123,7 @@ class Directory(File):
                     continue
                 
                 if isdir:
-                    self.files[file] = Directory(self, path + "/" + file)
+                    self.files[file] = Directory(self, path + "/" + file, max_depth=max_depth-1 if max_depth != None else None)
                 else:
                     self.files[file] = File(self, path + "/" + file)
         except OSError:
@@ -233,7 +235,15 @@ class Directory(File):
         
         for file in self.files.values():
             file.print_if_has_guesses(guesses)
+            
+    def print_project_log_for_guess(self, version_control):
+        matching_version_control_guess = None
+        for guess in self.collapsed_guesses():
+            if guess.file_type.clazz == "$version" and (guess.file_type.value == version_control or version_control == None):
+                if version_control == None and matching_version_control_guess != None:
+                    print_error("Multiple version control systems; use --version-control [VALUE] to select one")
+                    return
+                matching_version_control_guess = guess
                 
-        
-                
-        
+        matching_version_control_guess.guesser.print_log(self)
+    
