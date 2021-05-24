@@ -45,7 +45,7 @@ class DetectorRegistry:
                 if guess != None:
                     guess_added = []
                     for one_guess in guess:
-                        one_guess.guesser = guesser.name
+                        one_guess.guesser = guesser
                         one_guess.attributes["file_count"] = 1
                         try:
                             one_guess.attributes["file_size"] = os.path.getsize(file.path)

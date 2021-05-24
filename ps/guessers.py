@@ -22,7 +22,7 @@ class FileGuess:
     
     def to_user_readable_string(self):
         output = ""
-        output += self.file_type.to_user_readable_string() + sgr("32", " (" + self.guesser + ")\n")
+        output += self.file_type.to_user_readable_string() + sgr("32", " (" + self.guesser.name + ")\n")
         
         for name, value in self.attributes.items():
             output += "   - " + name + ": " + str(value) + "\n"
