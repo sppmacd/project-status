@@ -321,7 +321,7 @@ class VersionControlGuesser(Guesser):
         print_error("Invalid VersionControlGuesser")
         return None
     
-    def fancy_display_commit(self, data, format):
+    def fancy_display_commit(self, data, format="default"):
         author = data["author"]
         if format == "compact":
             return "{} ({}): {}".format(sgr("1;33", author["full_name"]), sgr("35", data["date"]), sgr("3", data["message"][4:]))
