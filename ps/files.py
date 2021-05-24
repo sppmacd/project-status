@@ -236,7 +236,7 @@ class Directory(File):
         for file in self.files.values():
             file.print_if_has_guesses(guesses)
             
-    def print_project_log_for_guess(self, version_control):
+    def print_project_log_for_guess(self, version_control, format):
         matching_version_control_guess = None
         for guess in self.collapsed_guesses():
             if guess.file_type.clazz == "$version" and (guess.file_type.value == version_control or version_control == None):
@@ -245,5 +245,5 @@ class Directory(File):
                     return
                 matching_version_control_guess = guess
                 
-        matching_version_control_guess.guesser.print_log(self)
+        matching_version_control_guess.guesser.print_log(self, format)
     

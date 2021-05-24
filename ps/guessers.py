@@ -317,13 +317,19 @@ class Guesser_Generic(Guesser):
             return [FileGuess(filetypes.mime_unknown(file.extension), unknown=True)]
 
 class VersionControlGuesser(Guesser):
-    def print_log(self, file):
+    def print_log(self, file, format):
         print_error("Invalid VersionControlGuesser")
         return None
     
-    def fancy_display_commit(self, data):
+    def fancy_display_commit(self, data, format):
         author = data["author"]
-        return "{} by {} {} at {}\n\n{}\n{}".format(sgr("4;34", data["hash"]), sgr("1;33", author["full_name"]), sgr("33", "<" + author["email"] + ">"), sgr("35",data["date"]), data["message"], sgr("90;3", data["description"]))
+        if format == "compact":
+            return "{} ({}): {}".format(sgr("1;33", author["full_name"]), sgr("35", data["date"]), sgr("3", data["message"][4:]))
+        elif format == "no-version":
+            return "{}, {}: \n{}\n{}".format(sgr("1;33", author["full_name"]), sgr("35", data["date"]), data["message"], sgr("90;3", data["description"]))
+        else:
+            return "{} by {} {} at {}\n\n{}\n{}".format(sgr("4;34", data["hash"]), sgr("1;33", author["full_name"]), sgr("33", "<" + author["email"] + ">"),
+                                                        sgr("35", data["date"]), data["message"], sgr("90;3", data["description"]))
 
 class Guesser_Git(VersionControlGuesser):
     def parse_git_log_output(self, output):
@@ -351,7 +357,6 @@ class Guesser_Git(VersionControlGuesser):
                 
             # Oops, we went too far! (Commit message lines starts with 4 spaces)
             if not next_line.startswith("    "):
-                print(sgr("41", next_line))
                 stringio.seek(seek)
             else:
                 stringio.seek(seek)
@@ -375,11 +380,10 @@ class Guesser_Git(VersionControlGuesser):
             
         return [guess]
     
-    def print_log(self, file):
+    def print_log(self, file, format):
         log = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log --reverse"))
-        print(log)
         for commit in log:
-            print(self.fancy_display_commit(commit))
+            print(self.fancy_display_commit(commit, format))
     
     def guess(self, file):
         if file.basename == ".git":

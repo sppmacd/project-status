@@ -53,9 +53,11 @@ def parse_args():
     sp_project_log = subparsers.add_parser("project-log", help="generate project log basing on version control data")
     sp_project_log.add_argument("path", nargs="?", help="path to project", default=".")
     sp_project_log.add_argument("--version-control", help="specify version control to use")
+    # TODO: Support custom formats
+    sp_project_log.add_argument("--format", "-f", help="specify format", choices=["default","compact","no-version"], default="default")
     
     # version
-    sp_version = subparsers.add_parser("version", help="display version")
+    sp_version = subparsers.add_parser("version", help="display version and quit")
 
     return parser.parse_args()
 
@@ -116,7 +118,7 @@ def main(args):
         file_list = Directory(None, config.args.path, max_depth=1)
         ps.logging.print_status("", "")
         print("Generating output")
-        file_list.print_project_log_for_guess(config.args.version_control)
+        file_list.print_project_log_for_guess(config.args.version_control, config.args.format)
 
 try:
     if __name__ == "__main__":
