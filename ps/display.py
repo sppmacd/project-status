@@ -195,7 +195,8 @@ def directory_fancy_display(dir):
         print("   - " + sgr("34", "Commits: ") + str(guess.attributes["commit_count"]))
         print("   - " + sgr("34", "Branches: ") + fancy_display_refs(guess.attributes["refs"]))
         head = guess.attributes["head"]
-        print("   - " + sgr("34", "Last commit: ") + guess.guesser.fancy_display_commit(head))
+        if head != {}:
+            print("   - " + sgr("34", "Last commit: ") + guess.guesser.fancy_display_commit(head))
     
     print_header("Storage")
     fancy_display(formats_by_storage, "file_size", description="bytes")

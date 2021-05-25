@@ -145,6 +145,7 @@ class filetypes:
     mime_html =             FileType.mime("text/html", "HTML")
     mime_ico =              FileType.mime("image/x-icon", "Icon (ICO)")
     mime_ini =              FileType.mime("custom$ini", "INI config")
+    mime_jar =              FileType.mime("custom$jar", "JAR")
     mime_java =             FileType.mime("text/x-java-source", "Java")
     mime_jpg =              FileType.mime("image/jpg", "JPG image")
     mime_js =               FileType.mime("application/js", "JavaScript")
@@ -152,11 +153,14 @@ class filetypes:
     mime_ld_script =        FileType.mime("custom$ld", "Linker script")
     mime_makefile =         FileType.mime("custom$makefile", "Makefile")
     mime_markdown =         FileType.mime("custom$markdown", "Markdown")
+    mime_mp3 =              FileType.mime("sound/mp3", "MP3 sound")
     mime_ninja =            FileType.mime("custom$ninja", "Ninja config")
     mime_object =           FileType.mime("custom$object", "Object")
     mime_ods =              FileType.mime("custom$ods", "OpenOffice Spreadsheet document")
     mime_odt =              FileType.mime("custom$odt", "OpenOffice Writer document")
+    mime_ogg =              FileType.mime("sound/ogg", "OGG sound")
     mime_patch =            FileType.mime("custom$patch", "Patch/diff")
+    mime_pe =               FileType.mime("custom$pe", "Portable Executable image")
     mime_pdf =              FileType.mime("application/pdf", "PDF document")
     mime_php =              FileType.mime("custom$php", "PHP")
     mime_png =              FileType.mime("image/png", "PNG image")
@@ -169,6 +173,7 @@ class filetypes:
     mime_text_plain =       FileType.mime("text/plain", "Plain text")
     mime_ttf =              FileType.mime("font/ttf", "TTF font")
     mime_wasm =             FileType.mime("custom$wasm", "WebAssembly")
+    mime_wav =              FileType.mime("sound/wav", "WAV sound")
     mime_xls =              FileType.mime("application/excel", "MS Excel document")
     mime_yaml =             FileType.mime("custom$yaml", "YML")
     mime_zip =              FileType.mime("application/x-zip-compressed", "ZIP archive")
@@ -341,17 +346,17 @@ class Guesser_Git(VersionControlGuesser):
             # If the first match fails, probably we reached EOF :)
             try:
                 hash = re.search("commit ([a-f0-9]{40})", stringio.readline()).group(1)
+                
+                author_regex = re.search("Author: (.*) <(.*)>", stringio.readline())
+                author = {"full_name": author_regex.group(1), "email": author_regex.group(2)}
+                date = re.search("Date:   (.*)", stringio.readline()).group(1)
+                stringio.readline() # Skip empty line
+                message = stringio.readline()
+                stringio.readline() # Skip empty line
+                description = ""
+                seek = stringio.tell()
             except:
                 break
-                
-            author_regex = re.search("Author: (.*) <(.*)>", stringio.readline())
-            author = {"full_name": author_regex.group(1), "email": author_regex.group(2)}
-            date = re.search("Date:   (.*)", stringio.readline()).group(1)
-            stringio.readline() # Skip empty line
-            message = stringio.readline()
-            stringio.readline() # Skip empty line
-            description = ""
-            seek = stringio.tell()
             
             next_line = stringio.readline()
                 
@@ -376,7 +381,8 @@ class Guesser_Git(VersionControlGuesser):
         
         guess.attributes["commit_count"] = int(run_process_in_dir_and_return_stdout(file.path, "git rev-list --all --count"))
         guess.attributes["refs"] = run_process_in_dir_and_return_stdout(file.path, "git for-each-ref --format=%(refname)").split('\n')
-        guess.attributes["head"] = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log HEAD^..HEAD"))[0]
+        head = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log HEAD^..HEAD"))
+        guess.attributes["head"] = head[0] if len(head) > 0 else {}
             
         return [guess]
     
@@ -423,6 +429,8 @@ class Guesser_Java(Guesser):
             return [FileGuess(filetypes.build_gradle)]
         elif file.extension == ".java":
             return [guess_source_file(filetypes.mime_java, file)]
+        elif file.extension == ".jar":
+            return [FileGuess(filetypes.mime_jar)]
 
 class Guesser_JavaScript(Guesser):
     def guess(self, file):
@@ -456,6 +464,15 @@ class Guesser_Shell(Guesser):
         if file.extension == ".sh":
             return [guess_source_file(filetypes.mime_shell, file)]
 
+class Guesser_Sound(Guesser):
+    def guess(self, file):
+        if file.extension == ".wav":
+            return [FileGuess(filetypes.mime_wav)]
+        elif file.extension == ".ogg":
+            return [FileGuess(filetypes.mime_ogg)]
+        elif file.extensino == ".mp3":
+            return [FileGuess(filetypes.mime_mp3)]
+
 class Guesser_Web(Guesser):
     def guess(self, file):
         if file.extension == ".php":
@@ -470,6 +487,7 @@ def register_all_guessers(registry):
     # High priority
     magic_guesser = MagicGuesser("Guesser which uses file patterns to detect formats")
     magic_guesser.register_subguesser(b'\x7fELF', filetypes.mime_elf)
+    magic_guesser.register_subguesser(b'PE\0\0',  filetypes.mime_pe)
     registry.register_file_type_guesser("magic",    magic_guesser, priority=-100)
     
     registry.register_file_type_guesser("asm",      Guesser_Assembly("Assembly sources"))
