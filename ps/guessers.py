@@ -9,7 +9,7 @@ from io import StringIO
 
 import config as config
 from .logging import *
-from .util import run_process_in_dir_and_return_stdout
+from .util import *
 
 class FileGuess:
     def __init__(self, file_type=None, **attributes):
@@ -237,6 +237,173 @@ class MagicGuesser(Guesser):
             print()
             print("   - " + str(subguesser[0]) + " → " + str(subguesser[1]), end="")
 
+class BuildSystemGuesser(Guesser):
+    
+    # All commands return None if operation is not supported, True on success,
+    # False on error. Output format is not standarized across build systems.
+    def run(self, file, args):
+        pass
+    
+    def configure(self, file, args):
+        pass
+    
+    def build(self, file, args):
+        pass
+    
+    def clean(self, file, args):
+        pass
+    
+    # `type` can be one of `targets`, `dependencies`
+    def info(self, file, type, args):
+        pass
+
+class Guesser_CMake(BuildSystemGuesser):
+    def guess(self, file):
+        if file.basename == "CMakeLists.txt" or file.extension == ".cmake":
+            return [FileGuess(filetypes.build_cmake), guess_source_file(filetypes.mime_cmake, file)]
+        elif file.basename == "CMakeFiles":
+            return [FileGuess(filetypes.build_cmake, special=True)]
+        
+    # TODO: Call the underlying (generated) build system for
+    # some commands!
+    def run(self, file, args):
+        return None #TODO
+    
+    def configure(self, file, args):
+        directory = args.get("directory")
+        directory = directory if directory != None else "build"
+        args = args.get("args")
+        args = args if args != None else ""
+        return run_process_in_dir(file.path, "cmake -B {} {}".format(directory, args))
+    
+    def build(self, file, args):
+        target = args.get("target")
+        if target == None:
+            target = ""
+        else:
+            target = "--target {}".format(target)
+        directory = args.get("directory")
+        directory = directory if directory != None else "build"
+        args = args.get("args")
+        args = args if args != None else ""
+        # TODO: Use multiple jobs
+        return run_process_in_dir(file.path, "cmake --build {} {} {}".format(directory, target, args))
+
+    def clean(self, file, args):
+        # It should be called by generated build system
+        return None
+    
+    def info(self, file, type, args):
+        # This is TODO.
+        # I've seen something like BUILDSYSTEM_TARGETS but
+        # I still don't know how to use it here...
+        return None
+
+class Guesser_GNUMake(BuildSystemGuesser):
+    def guess(self, file):
+        if re.search("Makefile.*", file.basename):
+            return [FileGuess(filetypes.build_gnu_make), guess_source_file(filetypes.mime_makefile, file)]
+        
+    def run(self, file, args):
+        return None #TODO
+    
+    def configure(self, file, args):
+        # Not applicable
+        return None
+
+    def build(self, file, args):
+        target = args.get("target")
+        if target == None:
+            print_error("You must specify a target!")
+        args = args.get("args")
+        args = args if args != None else ""
+        # TODO: Use multiple jobs
+        return run_process_in_dir(file.path, "make {} {}".format(target, args))
+
+    def clean(self, file, args):
+        return run_process_in_dir(file.path, "make clean")
+    
+    def info(self, file, type, args):
+        if type == "targets":
+            return run_process_in_dir(file.path, "make help")
+        return None
+
+class Guesser_Ninja(BuildSystemGuesser):
+    def guess(self, file):
+        if file.extension == ".ninja":
+            return [FileGuess(filetypes.build_ninja), guess_source_file(filetypes.mime_ninja, file)]
+        
+    def run(self, file, args):
+        return None #TODO
+    
+    def configure(self, file, args):
+        # Not applicable
+        return None
+
+    def build(self, file, args):
+        target = args.get("target")
+        if target == None:
+            print_error("You must specify a target!")
+        args = args.get("args")
+        args = args if args != None else ""
+        # TODO: Use multiple jobs
+        return run_process_in_dir(file.path, "ninja {} {}".format(target, args))
+
+    def clean(self, file, args):
+        return run_process_in_dir(file.path, "ninja clean")
+    
+    def info(self, file, type, args):
+        if type == "targets":
+            return run_process_in_dir(file.path, "ninja help")
+        return None
+    
+class Guesser_Node(BuildSystemGuesser):
+    def guess(self, file):
+        if file.basename == "package.json" or file.basename == "package-lock.json":
+            return [FileGuess(filetypes.build_node_js)]
+        
+    def run(self, file, args):
+        return None #TODO
+    
+    def configure(self, file, args):
+        return run_process_in_dir(file.path, "npm install")
+
+    def build(self, file, args):
+        # Not applicable.
+        return None
+
+    def clean(self, file, args):
+        # TODO: Maybe we can remove `node_modules`?
+        return None
+    
+    def info(self, file, type, args):
+        if type == "dependencies":
+            return run_process_in_dir(file.path, "npm list")
+
+        return None
+
+class Guesser_Pycache(Guesser):
+    def guess(self, file):
+        if file.basename == "__pycache__":
+            return [FileGuess(filetypes.build_python, special=True)]
+        
+    def run(self, file, args):
+        return None #TODO
+    
+    def configure(self, file, args):
+        return None #TODO
+
+    def build(self, file, args):
+        return None #TODO
+
+    def clean(self, file, args):
+        return None #TODO
+    
+    def info(self, file, type, args):
+        return None #TODO
+    
+
+# Source guessers!
 class Guesser_Assembly(Guesser):
     def guess(self, file):
         if file.extension == ".S" or file.extension == ".s" or file.extension == ".asm":
@@ -269,15 +436,7 @@ class Guesser_CompressArchive(Guesser):
 
 class Guesser_Cpp(Guesser):
     def guess(self, file):
-        if file.basename == "CMakeLists.txt" or file.extension == ".cmake":
-            return [FileGuess(filetypes.build_cmake), guess_source_file(filetypes.mime_cmake, file)]
-        elif file.basename == "CMakeFiles":
-            return [FileGuess(filetypes.build_cmake, special=True)]
-        elif re.search("Makefile.*", file.basename):
-            return [FileGuess(filetypes.build_gnu_make), guess_source_file(filetypes.mime_makefile, file)]
-        elif file.extension == ".ninja":
-            return [FileGuess(filetypes.build_ninja), guess_source_file(filetypes.mime_ninja, file)]
-        elif file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
+        if file.extension == ".c" or file.extension == ".cpp" or file.extension == ".h" or file.extension == ".hpp" or \
              file.extension == ".cxx" or file.extension == ".cc" or file.extension == ".hxx":
             return [guess_source_file(filetypes.mime_cpp, file)]
         elif file.extension == ".o":
@@ -434,9 +593,7 @@ class Guesser_Java(Guesser):
 
 class Guesser_JavaScript(Guesser):
     def guess(self, file):
-        if file.basename == "package.json" or file.basename == "package-lock.json":
-            return [FileGuess(filetypes.build_node_js)]
-        elif file.basename == "node_modules":
+        if file.basename == "node_modules":
             return [FileGuess(filetypes.build_node_js, special=True)]
         elif re.search("^gulpfile\..*\.js$", file.basename):
             return [FileGuess(filetypes.build_gulp)]
@@ -454,9 +611,7 @@ class Guesser_Markup(Guesser):
 
 class Guesser_Python(Guesser):
     def guess(self, file):
-        if file.basename == "__pycache__":
-            return [FileGuess(filetypes.build_python, special=True)]
-        elif file.extension == ".py":
+        if file.extension == ".py":
             return [guess_source_file(filetypes.mime_python, file)]
 
 class Guesser_Shell(Guesser):
@@ -492,6 +647,7 @@ def register_all_guessers(registry):
     
     registry.register_file_type_guesser("asm",      Guesser_Assembly("Assembly sources"))
     registry.register_file_type_guesser("ci",       Guesser_CI("Continuous integration files"))
+    registry.register_file_type_guesser("cmake",    Guesser_CMake("CMake build system"))
     registry.register_file_type_guesser("compress", Guesser_CompressArchive("Compressed and archive files"))
     registry.register_file_type_guesser("config",   Guesser_ConfigGeneric("Generic config files"))
     registry.register_file_type_guesser("cpp",      Guesser_Cpp("C++ and executable files"))
@@ -503,7 +659,11 @@ def register_all_guessers(registry):
     registry.register_file_type_guesser("inode",    Guesser_Inode("Directories etc."))
     registry.register_file_type_guesser("java",     Guesser_Java("Java sources"))
     registry.register_file_type_guesser("js",       Guesser_JavaScript("JS sources"))
+    registry.register_file_type_guesser("make",     Guesser_GNUMake("GNU Make build system"))
     registry.register_file_type_guesser("markup",   Guesser_Markup("Markup/formatting languages"))
+    registry.register_file_type_guesser("ninja",    Guesser_Ninja("Ninja build system"))
+    registry.register_file_type_guesser("node",     Guesser_Node("Node.js / NPM build system"))
+    registry.register_file_type_guesser("pycache",  Guesser_Pycache("Python runtime (__pycache__)"))
     registry.register_file_type_guesser("python",   Guesser_Python("Python sources"))
     registry.register_file_type_guesser("shell",    Guesser_Shell("Shell scripts"))
     registry.register_file_type_guesser("web",      Guesser_Web("Web-related formats"))

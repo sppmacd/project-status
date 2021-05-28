@@ -246,4 +246,51 @@ class Directory(File):
                 matching_version_control_guess = guess
                 
         matching_version_control_guess.guesser.print_log(self, format)
-    
+        
+    def run_build_command(self, build_system, command, **args):
+        matching_build_system_guesses = []
+        for guess in self.collapsed_guesses():
+            if guess.file_type.clazz == "$build" and (guess.file_type.value == build_system or build_system == None):
+                matching_build_system_guesses.append(guess)
+               
+        if len(matching_build_system_guesses) == 0:
+            print_error("No build systems found!")
+            return
+        
+        print("Build systems:\n")
+        for guess in matching_build_system_guesses:
+            print(guess.to_user_readable_string())
+        
+        try:
+            if command == "run":
+                for guess in matching_build_system_guesses:
+                    print_verbose("run {}".format(guess.file_type))
+                    if guess.guesser.run(self, args) != None:
+                        return
+            elif command == "configure":
+                for guess in matching_build_system_guesses:
+                    print_verbose("configure {}".format(guess.file_type))
+                    if guess.guesser.configure(self, args) != None:
+                        return
+            elif command == "build":
+                for guess in matching_build_system_guesses:
+                    print_verbose("build {}".format(guess.file_type))
+                    if guess.guesser.build(self, args) != None:
+                        return
+            elif command == "clean":
+                for guess in matching_build_system_guesses:
+                    print_verbose("clean {}".format(guess.file_type))
+                    if guess.guesser.clean(self, args) != None:
+                        return
+            elif command == "info":
+                for guess in matching_build_system_guesses:
+                    print_verbose("info {}".format(guess.file_type))
+                    if guess.guesser.info(self, args.get("type"), args) != None:
+                        return
+            else:
+                print_error("Invalid build system command!")
+                return
+        except:
+            print_error("Exception while running build system command! " + str(sys.exc_info()))
+            pass
+        print_error("No working build system found!")

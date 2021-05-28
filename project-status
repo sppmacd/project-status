@@ -19,6 +19,15 @@ def parse_args():
     
     subparsers = parser.add_subparsers(help="command", dest="command", required=True)
     
+    # build-system
+    sp_build_system = subparsers.add_parser("build-system", help="configure, build or run targets")
+    sp_build_system.add_argument("subcommand", nargs="?", help="build system command", default=".", choices=["run","configure","build","clean","info"])
+    sp_build_system.add_argument("path", nargs="?", help="path to display", default=".")
+    sp_build_system.add_argument("--build-system", help="specify build system to use")
+    sp_build_system.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_build_system.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_build_system.add_argument("args", nargs="*", help="args to pass to build system", default="")
+    
     # display-tree
     sp_display_tree = subparsers.add_parser("display-tree", help="display filesystem tree with guesses")
     sp_display_tree.add_argument("path", nargs="?", help="path to display", default=".")
@@ -68,6 +77,45 @@ def setup_directory():
     print("Setting up directory listing")
     return Directory(None, config.args.path)
 
+def do_run_commands():
+    if config.args.command == "build-system":
+        file_list = setup_directory()
+        ps.logging.print_status("", "")
+        print("Generating output")
+        file_list.run_build_command(config.args.build_system, config.args.subcommand)
+    
+    elif config.args.command == "display-tree":
+        file_list = setup_directory()
+        ps.logging.print_status("", "")
+        print("Generating output")
+        print(file_list)
+
+    elif config.args.command == "info":
+        file_list = setup_directory()
+        ps.logging.print_status("", "")
+        print("Generating output")
+        ps.display.directory_fancy_display(file_list)
+
+    elif config.args.command == "list":
+        file_list = setup_directory()
+        ps.logging.print_status("", "")
+        print("Generating output")
+        file_list.print_projects()
+
+    elif config.args.command == "list-files":
+        file_list = setup_directory()
+        ps.logging.print_status("", "")
+        print("Generating output")
+        file_list.print_if_has_guesses(config.args.guesses.split(","))
+        
+    elif config.args.command == "project-log":
+        config.args.exclude = []
+        config.args.include = []
+        file_list = Directory(None, config.args.path, max_depth=1)
+        ps.logging.print_status("", "")
+        print("Generating output")
+        file_list.print_project_log_for_guess(config.args.version_control, config.args.format)
+
 def main(args):
     if args.command == "version":
         print("Project Status v1.0\nCopyright (c) Sppmacd 2021")
@@ -87,38 +135,7 @@ def main(args):
     config.args = args
     
     FileDescriptorManager()
-    
-    if args.command == "display-tree":
-        file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
-        print(file_list)
-
-    elif args.command == "info":
-        file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
-        ps.display.directory_fancy_display(file_list)
-
-    elif args.command == "list":
-        file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
-        file_list.print_projects()
-
-    elif args.command == "list-files":
-        file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
-        file_list.print_if_has_guesses(config.args.guesses.split(","))
-        
-    elif args.command == "project-log":
-        config.args.exclude = []
-        config.args.include = []
-        file_list = Directory(None, config.args.path, max_depth=1)
-        ps.logging.print_status("", "")
-        print("Generating output")
-        file_list.print_project_log_for_guess(config.args.version_control, config.args.format)
+    do_run_commands()
 
 try:
     if __name__ == "__main__":
