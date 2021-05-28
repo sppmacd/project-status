@@ -1,21 +1,40 @@
 import os
+import platform
 import sys
 
 import config as config
 
 class __internal__:
     ansi_enabled = None
+    unicode_enabled = None
 
 def allow_ansi_escape_codes():
     if __internal__.ansi_enabled == None:
-        supported = os.name == "posix"
-        enabled = os.isatty(1) and not config.args.disable_formatting
-        __internal__.ansi_enabled = supported and enabled
+        supported = os.name == "posix" and os.isatty(1)
+        __internal__.ansi_enabled = supported and not config.args.no_formatting
     return __internal__.ansi_enabled
+    
+
+def allow_unicode():
+    if __internal__.unicode_enabled == None:
+        supported = sys.stdout.encoding.lower().startswith('utf')
+        __internal__.unicode_enabled = supported and not config.args.no_unicode
+    return __internal__.unicode_enabled
     
 
 def sgr(code, text):
     return ("\033[" + str(code) + "m" + str(text) + "\033[0m") if allow_ansi_escape_codes() else text
+
+def unicode(text):
+    def replace_unicode_characters(text):
+        text = text.replace("•", "*")
+        text = text.replace("╭─", ",-")
+        text = text.replace("─", "-")
+        text = text.replace("│", "|")
+        text = text.replace("▀", "#")
+        return text
+    
+    return text if allow_unicode() else replace_unicode_characters(text)
 
 def print_error(text):
     print(sgr("1;31", "[ERROR]"), sgr("31", text), file=sys.stderr)

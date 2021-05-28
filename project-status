@@ -14,6 +14,7 @@ import config
 def parse_args():
     parser = argparse.ArgumentParser(prog='project-status', description="Manage your projects.")
     parser.add_argument("--no-formatting", help="disable output formatting", action="store_true")
+    parser.add_argument("--no-unicode", help="disable Unicode output", action="store_true")
     parser.add_argument("--no-open", help="don't open files (for performance)", action="store_true")
     parser.add_argument("--verbose", "-v", help="print what is done", action="store_true")
     

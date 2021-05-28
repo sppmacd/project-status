@@ -205,7 +205,7 @@ class Directory(File):
         print(sgr("1;34", self.path))
         if config.args.more == True:
             for guess in self.collapsed_guesses():
-                print(" •", guess.to_user_readable_string())
+                print(unicode(" •"), guess.to_user_readable_string())
     
     def print_projects(self):
         if self.should_display_as_project():
