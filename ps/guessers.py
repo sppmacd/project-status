@@ -564,7 +564,7 @@ class Guesser_Git(VersionControlGuesser):
 class Guesser_Image(Guesser):
     def guess(self, file):
         if file.extension == ".gif":
-            return [FileGuess(filetypes.mime_png)]
+            return [FileGuess(filetypes.mime_gif)]
         elif file.extension == ".png":
             return [FileGuess(filetypes.mime_png)]
         elif file.extension == ".svg":
@@ -572,9 +572,9 @@ class Guesser_Image(Guesser):
         elif file.extension == ".jpg":
             return [FileGuess(filetypes.mime_jpg)]
         elif file.extension == ".ico":
-            return [FileGuess(filetypes.mime_png)]
+            return [FileGuess(filetypes.mime_ico)]
         elif file.extension == ".bmp":
-            return [FileGuess(filetypes.mime_png)]
+            return [FileGuess(filetypes.mime_bmp)]
 
 class Guesser_Inode(Guesser):
     def guess(self, file):
