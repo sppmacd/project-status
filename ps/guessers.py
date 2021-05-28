@@ -497,42 +497,40 @@ class VersionControlGuesser(Guesser):
 
 class Guesser_Git(VersionControlGuesser):
     def parse_git_log_output(self, output):
-        stringio = StringIO(output)
-        
         data = []
         
         while True:
             # If the first match fails, probably we reached EOF :)
             try:
-                hash = re.search("commit ([a-f0-9]{40})", stringio.readline()).group(1)
+                hash = re.search("commit ([a-f0-9]{40})", output.readline().decode()).group(1)
                 
-                author_regex = re.search("Author: (.*) <(.*)>", stringio.readline())
+                author_regex = re.search("Author: (.*) <(.*)>", output.readline().decode())
                 author = {"full_name": author_regex.group(1), "email": author_regex.group(2)}
-                date = re.search("Date:   (.*)", stringio.readline()).group(1)
-                stringio.readline() # Skip empty line
-                message = stringio.readline()
-                stringio.readline() # Skip empty line
+                date = re.search("Date:   (.*)", output.readline().decode()).group(1)
+                output.readline() # Skip empty line
+                message = output.readline().decode()
                 description = ""
-                seek = stringio.tell()
             except:
                 break
             
-            next_line = stringio.readline()
-                
-            # Oops, we went too far! (Commit message lines starts with 4 spaces)
-            if not next_line.startswith("    "):
-                stringio.seek(seek)
+            output.readline() # Skip empty line
+            next_line = output.peek().decode()
+            if not next_line.startswith('    '):
+                # No description
+                pass
             else:
-                stringio.seek(seek)
                 while True:
-                    next_line = stringio.readline()
+                    next_line = output.readline().decode()
 
                     if not next_line.startswith("    "):
                         break
 
                     description += next_line
             
+            if description == "":
+                description = "    <No description>\n"
             data.append({"hash":hash, "author":author, "date":date, "message":message, "description":description})
+        output.close()
         return data
     
     def git_guess(self, file):
@@ -540,13 +538,13 @@ class Guesser_Git(VersionControlGuesser):
         
         guess.attributes["commit_count"] = int(run_process_in_dir_and_return_stdout(file.path, "git rev-list --all --count"))
         guess.attributes["refs"] = run_process_in_dir_and_return_stdout(file.path, "git for-each-ref --format=%(refname)").split('\n')
-        head = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log HEAD^..HEAD"))
+        head = self.parse_git_log_output(run_process_in_dir_and_return_stdout_stream(file.path, "git log HEAD^..HEAD"))
         guess.attributes["head"] = head[0] if len(head) > 0 else {}
             
         return [guess]
     
     def print_log(self, file, format):
-        log = self.parse_git_log_output(run_process_in_dir_and_return_stdout(file.path, "git log --reverse"))
+        log = self.parse_git_log_output(run_process_in_dir_and_return_stdout_stream(file.path, "git log --reverse"))
         for commit in log:
             print(self.fancy_display_commit(commit, format))
     
