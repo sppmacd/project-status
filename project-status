@@ -50,6 +50,7 @@ def parse_args():
     sp_list.add_argument("path", nargs="?", help="path to list projects from", default=".")
     sp_list.add_argument("--exclude", "-x", help="exclude specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
     sp_list.add_argument("--include", "-i", help="include only specified files by glob (guessers if started with '/', multiple-entries shall be comma-separated)")
+    sp_list.add_argument("--more", "-m", help="print more detailed information", action="store_true")
     
     # list-files
     sp_list_files = subparsers.add_parser("list-files", help="list files in project")
