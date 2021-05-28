@@ -25,10 +25,9 @@ def print_verbose(text):
         print(sgr("1;35", "[VERBOSE]"), sgr("35", text), file=sys.stderr)
     print_status("verbose", text)
 
-def print_status(status, text):
+def print_status(status, text = ""):
     if not allow_ansi_escape_codes():
         # we can't do anything with these terminals :(
-        print(text)
         return
     
     text = text[0:100]
