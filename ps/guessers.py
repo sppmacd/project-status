@@ -644,6 +644,10 @@ def register_all_guessers(registry):
     magic_guesser = MagicGuesser("Guesser which uses file patterns to detect formats")
     magic_guesser.register_subguesser(b'\x7fELF',                   filetypes.mime_elf)
     magic_guesser.register_subguesser(b'PE\0\0',                    filetypes.mime_pe)
+    magic_guesser.register_subguesser(b'#!/usr/bin/env python',     filetypes.mime_python, source=True)
+    magic_guesser.register_subguesser(b'#!/usr/bin/python',         filetypes.mime_python, source=True)
+    magic_guesser.register_subguesser(b'#!/bin/sh',                 filetypes.mime_shell, source=True)
+    magic_guesser.register_subguesser(b'#!/bin/bash',               filetypes.mime_shell, source=True)
     registry.register_file_type_guesser("magic",    magic_guesser, priority=-100)
     
     registry.register_file_type_guesser("asm",      Guesser_Assembly("Assembly sources"))
