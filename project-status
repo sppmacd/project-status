@@ -123,7 +123,7 @@ def main(args):
             for priority, guesser_list in DetectorRegistry.instance.file_type_guessers.items():
                 print(ps.logging.sgr("1;33", "priority") + " = " + ps.logging.sgr("35", str(priority)) + ": ")
                 for guesser in guesser_list:
-                    print(" • " + ps.logging.sgr("32", "/" + guesser.name), end="")
+                    print(ps.logging.unicode(" • ") + ps.logging.sgr("32", "/" + guesser.name), end="")
                     if args.more:
                         guesser.print_additional_info()
                     print()

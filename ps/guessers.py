@@ -238,7 +238,7 @@ class MagicGuesser(Guesser):
         
         for subguesser in self.subguessers:
             print()
-            print("   - " + str(subguesser[0]) + " → " + str(subguesser[1]), end="")
+            print("   - " + str(subguesser[0]) + unicode(" → ") + str(subguesser[1]), end="")
 
 class BuildSystemGuesser(Guesser):
     
