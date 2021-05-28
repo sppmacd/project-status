@@ -75,46 +75,40 @@ def setup_directory():
     config.args.exclude = config.args.exclude.split(",") if config.args.exclude != None else []
     config.args.include = config.args.include.split(",") if config.args.include != None else []
     
-    print("Setting up directory listing")
+    ps.logging.print_status("Setting up directory listing")
     return Directory(None, config.args.path)
 
 def do_run_commands():
     if config.args.command == "build-system":
         file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
+        ps.logging.print_status("Generating output")
         file_list.run_build_command(config.args.build_system, config.args.subcommand)
     
     elif config.args.command == "display-tree":
         file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
+        ps.logging.print_status("Generating output")
         print(file_list)
 
     elif config.args.command == "info":
         file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
+        ps.logging.print_status("Generating output")
         ps.display.directory_fancy_display(file_list)
 
     elif config.args.command == "list":
         file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
+        ps.logging.print_status("Generating output")
         file_list.print_projects()
 
     elif config.args.command == "list-files":
         file_list = setup_directory()
-        ps.logging.print_status("", "")
-        print("Generating output")
+        ps.logging.print_status("Generating output")
         file_list.print_if_has_guesses(config.args.guesses.split(","))
         
     elif config.args.command == "project-log":
         config.args.exclude = []
         config.args.include = []
         file_list = Directory(None, config.args.path, max_depth=1)
-        ps.logging.print_status("", "")
-        print("Generating output")
+        ps.logging.print_status("Generating output")
         file_list.print_project_log_for_guess(config.args.version_control, config.args.format)
 
 def main(args):
