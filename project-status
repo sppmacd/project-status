@@ -113,6 +113,8 @@ def do_run_commands():
         file_list.print_project_log_for_guess(config.args.version_control, config.args.format)
 
 def main(args):
+    config.args = args
+
     if args.command == "version":
         print("Project Status v1.0\nCopyright (c) Sppmacd 2021")
         sys.exit(0)
@@ -127,8 +129,6 @@ def main(args):
                     print()
                 print()
         sys.exit(0)
-    
-    config.args = args
     
     FileDescriptorManager()
     do_run_commands()

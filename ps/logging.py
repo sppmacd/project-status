@@ -32,6 +32,7 @@ def unicode(text):
         text = text.replace("─", "-")
         text = text.replace("│", "|")
         text = text.replace("▀", "#")
+        text = text.replace("→", "->")
         return text
     
     return text if allow_unicode() else replace_unicode_characters(text)
