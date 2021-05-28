@@ -38,6 +38,10 @@ class FileGuess:
             self.attributes[name] |= value
         elif isinstance(self.attributes[name], int):
             self.attributes[name] += value
+        elif isinstance(self.attributes[name], list):
+            self.attributes[name].append(value)
+        else:
+            self.attributes[name] = [self.attributes[name], value]
 
     def is_special(self):
         return self.attributes.get("special")
