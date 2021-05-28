@@ -227,6 +227,9 @@ class MagicGuesser(Guesser):
             fd.seek(0)
             bytes = fd.read(len(magic))
             if bytes == magic:
+                print_verbose("Magic guess: " + str(filetype) + " (" + bytes.decode() + ")")
+                if attributes.get("source") != None:
+                    return [guess_source_file(filetype, file)]
                 return [FileGuess(filetype, *attributes)]
         return []
     
@@ -639,8 +642,8 @@ class Guesser_Web(Guesser):
 def register_all_guessers(registry):
     # High priority
     magic_guesser = MagicGuesser("Guesser which uses file patterns to detect formats")
-    magic_guesser.register_subguesser(b'\x7fELF', filetypes.mime_elf)
-    magic_guesser.register_subguesser(b'PE\0\0',  filetypes.mime_pe)
+    magic_guesser.register_subguesser(b'\x7fELF',                   filetypes.mime_elf)
+    magic_guesser.register_subguesser(b'PE\0\0',                    filetypes.mime_pe)
     registry.register_file_type_guesser("magic",    magic_guesser, priority=-100)
     
     registry.register_file_type_guesser("asm",      Guesser_Assembly("Assembly sources"))
