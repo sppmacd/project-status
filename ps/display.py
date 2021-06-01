@@ -62,9 +62,8 @@ def fancy_display(data, attribute, **kwargs):
         print(sgr("1;31", "\n (No data)\n"))
         return
         
-    # TODO: Detect terminal size
     # TODO: Display other guesses as "Other" category
-    display_size = 100
+    display_size = os.get_terminal_size()[0] - 10
     total_line_count = 0
     
     # Generate display size for each guess
