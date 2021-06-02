@@ -63,7 +63,7 @@ def fancy_display(data, attribute, **kwargs):
         return
         
     # TODO: Display other guesses as "Other" category
-    display_size = os.get_terminal_size()[0] - 10
+    display_size = os.get_terminal_size()[0]*3//4 - 10
     total_line_count = 0
     
     # Generate display size for each guess
