@@ -184,7 +184,7 @@ class filetypes:
     
     @staticmethod
     def mime_unknown(ext):
-        return FileType.mime("?(" + ext + ")", "Unknown (" + ext + ")")
+        return FileType.mime("?(" + ext + ")", sgr("33", "Unknown (" + ext + ")"))
     
     # Version controls
     version_git = FileType.version_control("git", "Git")
