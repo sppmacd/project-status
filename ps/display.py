@@ -78,7 +78,7 @@ def fancy_display(data, attribute, **kwargs):
     
     for guess in reversed(data):
         if guess.attributes.get(attribute) != None:
-            print(unicode(" •"), guess.file_type.to_fancy_string() + " - " + sgr("1", str(guess.attributes.get(attribute))) + " " + kwargs.get("description"))
+            print(unicode(" • ") + guess.file_type.to_fancy_string() + sgr("32", (" (/" + guess.guesser.name + ")")) + " - " + sgr("1", str(guess.attributes.get(attribute))) + " " + kwargs.get("description"))
     
     # Print fancy chart :)
     print()
