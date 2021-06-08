@@ -27,7 +27,7 @@ def run_process_in_dir_and_return_stdout_stream(cwd, args):
         return process.stdout
     except:
         print_error("Failed to run: " + args)
-        return None
+        return ""
 
 def depth_indent(depth):
     return "  "*depth;

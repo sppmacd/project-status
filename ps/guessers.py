@@ -493,6 +493,8 @@ class VersionControlGuesser(Guesser):
         return None
     
     def fancy_display_commit(self, data, format="default"):
+        if data == None:
+            return "(Failed to load)"
         author = data["author"]
         if format == "compact":
             return "{} ({}): {}".format(sgr("1;33", author["full_name"]), sgr("35", data["date"]), sgr("3", data["message"][4:]))
@@ -543,10 +545,13 @@ class Guesser_Git(VersionControlGuesser):
     def git_guess(self, file):
         guess = FileGuess(filetypes.version_git, special=True)
         
-        guess.attributes["commit_count"] = int(run_process_in_dir_and_return_stdout(file.path, "git rev-list --all --count"))
-        guess.attributes["refs"] = run_process_in_dir_and_return_stdout(file.path, "git for-each-ref --format=%(refname)").split('\n')
-        head = self.parse_git_log_output(run_process_in_dir_and_return_stdout_stream(file.path, "git log HEAD^..HEAD"))
-        guess.attributes["head"] = head[0] if len(head) > 0 else {}
+        try:
+            guess.attributes["commit_count"] = int(run_process_in_dir_and_return_stdout(file.path, "git rev-list --all --count"))
+            guess.attributes["refs"] = run_process_in_dir_and_return_stdout(file.path, "git for-each-ref --format=%(refname)").split('\n')
+            head = self.parse_git_log_output(run_process_in_dir_and_return_stdout_stream(file.path, "git log HEAD^..HEAD"))
+            guess.attributes["head"] = head[0] if len(head) > 0 else {}
+        except:
+            pass
             
         return [guess]
     

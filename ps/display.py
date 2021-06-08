@@ -180,6 +180,8 @@ def directory_fancy_display(dir):
     print()
     
     def fancy_display_refs(data):
+        if data == None:
+            return "(Failed to load)"
         output = set()
         for ref in data:
             last_slash = ref.rfind('/')
@@ -191,9 +193,9 @@ def directory_fancy_display(dir):
     for guess in version_control:
         print(unicode(" • ") + guess.file_type.to_fancy_string())
         print()
-        print("   - " + sgr("34", "Commits: ") + str(guess.attributes["commit_count"]))
-        print("   - " + sgr("34", "Branches: ") + fancy_display_refs(guess.attributes["refs"]))
-        head = guess.attributes["head"]
+        print("   - " + sgr("34", "Commits: ") + str(guess.attributes.get("commit_count")))
+        print("   - " + sgr("34", "Branches: ") + fancy_display_refs(guess.attributes.get("refs")))
+        head = guess.attributes.get("head")
         if head != {}:
             print("   - " + sgr("34", "Last commit: ") + guess.guesser.fancy_display_commit(head))
     
