@@ -56,7 +56,7 @@ def fancy_display(data, attribute, **kwargs):
     for guess in data:
         attribute_value = guess.attributes.get(attribute)
         total_attribute_value += (attribute_value if attribute_value != None else 0)
-    
+
     # Do not display anything if no data
     if total_attribute_value == 0:
         print(sgr("1;31", "\n (No data)\n"))
@@ -80,6 +80,9 @@ def fancy_display(data, attribute, **kwargs):
         if guess.attributes.get(attribute) != None:
             print(unicode(" • ") + guess.file_type.to_fancy_string() + sgr("32", (" (/" + guess.guesser.name + ")")) + " - " + sgr("1", str(guess.attributes.get(attribute))) + " " + kwargs.get("description"))
     
+    # Display total
+    print(unicode(" • ") + sgr("1;95;3", "Total") + " - " + sgr("1", str(total_attribute_value)) + " " + kwargs.get("description"))
+
     # Print fancy chart :)
     print()
 
