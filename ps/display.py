@@ -187,7 +187,10 @@ def directory_fancy_display(dir):
             return "(Failed to load)"
         output = set()
         for ref in data:
-            last_slash = ref.rfind('/')
+            try:
+                last_slash = ref.rfind('/')
+            except:
+                continue
             branch_name = ref[last_slash+1:]
             if branch_name != "":
                 output.add(branch_name)

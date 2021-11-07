@@ -495,6 +495,8 @@ class VersionControlGuesser(Guesser):
     def fancy_display_commit(self, data, format="default"):
         if data == None:
             return "(Failed to load)"
+        if isinstance(data, list):
+            data = data[0]
         author = data["author"]
         if format == "compact":
             return "{} ({}): {}".format(sgr("1;33", author["full_name"]), sgr("35", data["date"]), sgr("3", data["message"][4:]))
