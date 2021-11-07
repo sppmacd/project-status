@@ -142,6 +142,7 @@ class filetypes:
     mime_docker =           FileType.mime("custom$docker", "Dockerfile")
     mime_dynamic_library =  FileType.mime("custom$dynamic_library", "Dynamic library")
     mime_elf =              FileType.mime("custom$elf", "ELF binary")
+    mime_evs =              FileType.mime("custom$evs", "EvoScript")
     mime_gif =              FileType.mime("image/gif", "GIF image")
     mime_gitignore =        FileType.mime("custom$git/ignore", ".gitignore")
     mime_gitattributes =    FileType.mime("custom$git/attributes", ".gitattributes")
@@ -475,6 +476,11 @@ class Guesser_Document(Guesser):
         elif file.extension == ".pdf":
             return [FileGuess(filetypes.mime_pdf)]
 
+class Guesser_Evs(Guesser):
+    def guess(self, file):
+        if file.extension == ".evs":
+            return [guess_source_file(filetypes.mime_evs, file)]
+
 class Guesser_Font(Guesser):
     def guess(self, file):
         if file.extension == ".ttf":
@@ -669,6 +675,7 @@ def register_all_guessers(registry):
     registry.register_file_type_guesser("cpp",      Guesser_Cpp("C++ and executable files"))
     registry.register_file_type_guesser("docker",   Guesser_Docker("Docker config files"))
     registry.register_file_type_guesser("document", Guesser_Document("Various document files"))
+    registry.register_file_type_guesser("evs",      Guesser_Evs("EvoScript sources"))
     registry.register_file_type_guesser("font",     Guesser_Font("Font files"))
     registry.register_file_type_guesser("git",      Guesser_Git("Git config files"))
     registry.register_file_type_guesser("image",    Guesser_Image("Image (picture) files"))
