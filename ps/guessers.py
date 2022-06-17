@@ -137,6 +137,7 @@ class filetypes:
     mime_config =           FileType.mime("custom$config", "Config")
     mime_cpp =              FileType.mime("text/x-c", "C/C++")
     mime_css =              FileType.mime("text/css", "CSS")
+    mime_csv =              FileType.mime("text/csv", "CSV")
     mime_directory =        FileType.mime("inode/directory", "Directory")
     mime_doc =              FileType.mime("application/msword", "MS Word document")
     mime_docker =           FileType.mime("custom$docker", "Dockerfile")
@@ -146,6 +147,7 @@ class filetypes:
     mime_gif =              FileType.mime("image/gif", "GIF image")
     mime_gitignore =        FileType.mime("custom$git/ignore", ".gitignore")
     mime_gitattributes =    FileType.mime("custom$git/attributes", ".gitattributes")
+    mime_go =               FileType.mime("custom$go", "Go")
     mime_gz =               FileType.mime("application/x-compressed$gz", "Gzip-compressed file")
     mime_html =             FileType.mime("text/html", "HTML")
     mime_ico =              FileType.mime("image/x-icon", "Icon (ICO)")
@@ -158,7 +160,9 @@ class filetypes:
     mime_ld_script =        FileType.mime("custom$ld", "Linker script")
     mime_makefile =         FileType.mime("custom$makefile", "Makefile")
     mime_markdown =         FileType.mime("custom$markdown", "Markdown")
+    mime_mkv =              FileType.mime("video/mkv", "MKV video")
     mime_mp3 =              FileType.mime("sound/mp3", "MP3 sound")
+    mime_mp4 =              FileType.mime("video/mp4", "MP4 video")
     mime_ninja =            FileType.mime("custom$ninja", "Ninja config")
     mime_object =           FileType.mime("custom$object", "Object")
     mime_ods =              FileType.mime("custom$ods", "OpenOffice Spreadsheet document")
@@ -174,8 +178,10 @@ class filetypes:
     mime_static_library =   FileType.mime("custom$static_library", "Static library")
     mime_svg =              FileType.mime("custom$svg", "SVG image")
     mime_symlink =          FileType.mime("inode/symlink", "Symlink")
+    mime_systemd_service =  FileType.mime("custom$systemd/service", "systemd service")
     mime_tar =              FileType.mime("application/x-tar", "Tar archive")
     mime_text_plain =       FileType.mime("text/plain", "Plain text")
+    mime_ts =               FileType.mime("application/ts", "TypeScript")
     mime_ttf =              FileType.mime("font/ttf", "TTF font")
     mime_wasm =             FileType.mime("custom$wasm", "WebAssembly")
     mime_wav =              FileType.mime("sound/wav", "WAV sound")
@@ -199,6 +205,7 @@ class filetypes:
     build_ninja = FileType.build_system("ninja", "Ninja")
     build_node_js = FileType.build_system("node_js", "Node.js")
     build_python =  FileType.build_system("python", "Python (__pycache__)")
+    build_tsconfig = FileType.build_system("tsconfig", "TypeScript")
     
     # CI
     ci_github_actions = FileType.continuous_integration("github_actions", "GitHub Actions")
@@ -453,8 +460,13 @@ class Guesser_Cpp(Guesser):
             return [guess_source_file(filetypes.mime_ld_script, file)]
         elif file.extension == ".a":
             return [FileGuess(filetypes.mime_static_library)]
-        elif file.extension == ".dll":
+        elif file.extension == ".dll" or file.extension == ".so":
             return [FileGuess(filetypes.mime_dynamic_library)]
+
+class Guesser_Data(Guesser):
+    def guess(self, file):
+        if file.extension == ".csv":
+            return [guess_source_file(filetypes.mime_csv, file)]
 
 class Guesser_Docker(Guesser):
     def guess(self, file):
@@ -613,12 +625,16 @@ class Guesser_JavaScript(Guesser):
     def guess(self, file):
         if file.basename == "node_modules":
             return [FileGuess(filetypes.build_node_js, special=True)]
+        elif file.basename == "tsconfig.json":
+            return [FileGuess(filetypes.build_tsconfig)]
         elif re.search("^gulpfile\..*\.js$", file.basename):
             return [FileGuess(filetypes.build_gulp)]
         elif file.extension == ".js":
             return [guess_source_file(filetypes.mime_js, file)]
         elif file.extension == ".json":
             return [guess_source_file(filetypes.mime_json, file)]
+        elif file.extension == ".ts":
+            return [guess_source_file(filetypes.mime_ts, file)]
 
 class Guesser_Markup(Guesser):
     def guess(self, file):
@@ -643,8 +659,20 @@ class Guesser_Sound(Guesser):
             return [FileGuess(filetypes.mime_wav)]
         elif file.extension == ".ogg":
             return [FileGuess(filetypes.mime_ogg)]
-        elif file.extensino == ".mp3":
+        elif file.extension == ".mp3":
             return [FileGuess(filetypes.mime_mp3)]
+
+class Guesser_Systemd(Guesser):
+    def guess(self, file):
+        if file.extension == ".service":
+            return [guess_source_file(filetypes.mime_systemd_service, file)]
+
+class Guesser_Video(Guesser):
+    def guess(self, file):
+        if file.extension == ".mkv":
+            return [FileGuess(filetypes.mime_mkv)]
+        if file.extension == ".mp4":
+            return [FileGuess(filetypes.mime_mp4)]
 
 class Guesser_Web(Guesser):
     def guess(self, file):
@@ -673,6 +701,7 @@ def register_all_guessers(registry):
     registry.register_file_type_guesser("compress", Guesser_CompressArchive("Compressed and archive files"))
     registry.register_file_type_guesser("config",   Guesser_ConfigGeneric("Generic config files"))
     registry.register_file_type_guesser("cpp",      Guesser_Cpp("C++ and executable files"))
+    registry.register_file_type_guesser("data",     Guesser_Data("Data(base) files"))
     registry.register_file_type_guesser("docker",   Guesser_Docker("Docker config files"))
     registry.register_file_type_guesser("document", Guesser_Document("Various document files"))
     registry.register_file_type_guesser("evs",      Guesser_Evs("EvoScript sources"))
@@ -689,6 +718,9 @@ def register_all_guessers(registry):
     registry.register_file_type_guesser("pycache",  Guesser_Pycache("Python runtime (__pycache__)"))
     registry.register_file_type_guesser("python",   Guesser_Python("Python sources"))
     registry.register_file_type_guesser("shell",    Guesser_Shell("Shell scripts"))
+    registry.register_file_type_guesser("sound",    Guesser_Sound("Sound files"))
+    registry.register_file_type_guesser("systemd ", Guesser_Systemd("systemd config"))
+    registry.register_file_type_guesser("video",    Guesser_Video("Videos"))
     registry.register_file_type_guesser("web",      Guesser_Web("Web-related formats"))
     
     # Low priority
