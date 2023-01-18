@@ -174,6 +174,7 @@ class filetypes:
     mime_php =              FileType.mime("custom$php", "PHP")
     mime_png =              FileType.mime("image/png", "PNG image")
     mime_python =           FileType.mime("application/x-python", "Python")
+    mime_scss =             FileType.mime("text/scss", "SCSS/Sass")
     mime_shell =            FileType.mime("application/x-sh", "Shell")
     mime_static_library =   FileType.mime("custom$static_library", "Static library")
     mime_svg =              FileType.mime("custom$svg", "SVG image")
@@ -183,6 +184,7 @@ class filetypes:
     mime_text_plain =       FileType.mime("text/plain", "Plain text")
     mime_ts =               FileType.mime("application/ts", "TypeScript")
     mime_ttf =              FileType.mime("font/ttf", "TTF font")
+    mime_vue =              FileType.mime("text/vue", "Vue.js")
     mime_wasm =             FileType.mime("custom$wasm", "WebAssembly")
     mime_wav =              FileType.mime("sound/wav", "WAV sound")
     mime_xls =              FileType.mime("application/excel", "MS Excel document")
@@ -629,7 +631,7 @@ class Guesser_JavaScript(Guesser):
             return [FileGuess(filetypes.build_tsconfig)]
         elif re.search("^gulpfile\..*\.js$", file.basename):
             return [FileGuess(filetypes.build_gulp)]
-        elif file.extension == ".js":
+        elif file.extension == ".js" or file.extension == ".cjs" or file.extension == ".mjs":
             return [guess_source_file(filetypes.mime_js, file)]
         elif file.extension == ".json":
             return [guess_source_file(filetypes.mime_json, file)]
@@ -680,6 +682,10 @@ class Guesser_Web(Guesser):
             return [guess_source_file(filetypes.mime_php, file)]
         elif file.extension == ".css":
             return [guess_source_file(filetypes.mime_css, file)]
+        elif file.extension == ".scss":
+            return [guess_source_file(filetypes.mime_scss, file)]
+        elif file.extension == ".vue":
+            return [guess_source_file(filetypes.mime_vue, file)]
         elif file.extension == ".wasm":
             return [guess_source_file(filetypes.mime_wasm, file)]
         
